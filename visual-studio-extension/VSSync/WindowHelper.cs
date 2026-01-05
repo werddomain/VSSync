@@ -75,9 +75,15 @@ namespace VSSync
 
                 try
                 {
-                    // Try multiple methods to bring window to front
+                    // Windows has "focus stealing prevention" that blocks applications from 
+                    // forcefully bringing their windows to the foreground. We use multiple
+                    // techniques in sequence to maximize the chance of success.
                     
                     // Method 1: SetWindowPos with TOPMOST, then NOTOPMOST (flash technique)
+                    // This works by briefly making the window "always on top" (TOPMOST), which
+                    // bypasses focus prevention, then immediately removing the TOPMOST flag
+                    // (NOTOPMOST) to restore normal z-order behavior. The window remains
+                    // in the foreground because it was just brought there by the TOPMOST call.
                     SetWindowPos(hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
                     SetWindowPos(hWnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 

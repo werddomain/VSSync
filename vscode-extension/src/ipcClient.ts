@@ -4,15 +4,13 @@
  */
 
 import * as net from 'net';
+import * as path from 'path';
 import {
-    IpcMessage,
     IdeInstance,
     createMessage,
     parseMessage,
-    DiscoverPayload,
-    DiscoverResponsePayload,
-    OpenFilePayload,
-    OpenFileResponsePayload
+    isDiscoverResponsePayload,
+    isOpenFileResponsePayload
 } from './protocol';
 
 const DEFAULT_BASE_PORT = 52342;
@@ -94,9 +92,14 @@ export class IpcClient {
                     if (msg && msg.type === 'OPEN_FILE_RESPONSE') {
                         responseReceived = true;
                         clearTimeout(timeoutId);
-                        const payload = msg.payload as unknown as OpenFileResponsePayload;
                         socket.destroy();
-                        resolve(payload.success);
+                        
+                        if (isOpenFileResponsePayload(msg.payload)) {
+                            resolve(msg.payload.success);
+                        } else {
+                            resolve(false);
+                        }
+                        return;
                     }
                 }
                 buffer = lines[lines.length - 1];
@@ -149,7 +152,14 @@ export class IpcClient {
                     if (msg && msg.type === 'DISCOVER_RESPONSE') {
                         responseReceived = true;
                         clearTimeout(timeoutId);
-                        const payload = msg.payload as unknown as DiscoverResponsePayload;
+                        
+                        if (!isDiscoverResponsePayload(msg.payload)) {
+                            socket.destroy();
+                            resolve(null);
+                            return;
+                        }
+                        
+                        const payload = msg.payload;
                         
                         // Only return if it's a Visual Studio instance with matching workspace
                         if (payload.ide === 'visualstudio' && 
@@ -189,10 +199,31 @@ export class IpcClient {
     }
 
     /**
-     * Normalize file path for cross-platform comparison
+     * Normalize file path for cross-platform comparison.
+     * Handles various path formats including UNC paths and removes trailing separators.
      */
     private normalizePath(filePath: string): string {
-        return filePath.replace(/\\/g, '/').toLowerCase();
+        // Handle empty paths
+        if (!filePath) {
+            return '';
+        }
+        
+        // Normalize path separators and resolve .. and .
+        let normalized = path.normalize(filePath);
+        
+        // Convert backslashes to forward slashes for consistency
+        normalized = normalized.replace(/\\/g, '/');
+        
+        // Remove trailing separator (unless it's a root path like "/" or "C:/")
+        if (normalized.length > 1 && normalized.endsWith('/')) {
+            const withoutTrailing = normalized.slice(0, -1);
+            // Keep trailing slash only for root paths like "C:"
+            if (withoutTrailing.length !== 2 || withoutTrailing[1] !== ':') {
+                normalized = withoutTrailing;
+            }
+        }
+        
+        return normalized.toLowerCase();
     }
 
     /**

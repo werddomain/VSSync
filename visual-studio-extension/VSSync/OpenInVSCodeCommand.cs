@@ -253,16 +253,26 @@ namespace VSSync
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            // Simple selection using a message box with numbered options
-            // In a real implementation, you'd use a custom dialog
-            var options = string.Join("\n", instances.Select((inst, idx) =>
-                $"{idx + 1}. VS Code {inst.Version} - {inst.WorkspacePath} (PID: {inst.Pid})"));
+            // Build description list for the dialog
+            var descriptions = instances.Select((inst, idx) =>
+                $"{idx + 1}. VS Code {inst.Version}\n   Path: {inst.WorkspacePath}\n   PID: {inst.Pid}").ToList();
 
-            var message = $"Multiple VS Code instances found. Please select one:\n\n{options}\n\n" +
-                          "Enter the number of your choice:";
+            var message = $"Multiple VS Code instances found ({instances.Count}).\n\n" +
+                          string.Join("\n\n", descriptions) + "\n\n" +
+                          "The first matching instance will be used.\n" +
+                          "To use a different instance, close other VS Code windows and try again.";
 
-            // For simplicity, we'll just use the first instance
-            // A proper implementation would show a dialog
+            // Show informational dialog. For a more sophisticated implementation,
+            // a custom WPF dialog could be used to allow explicit selection.
+            VsShellUtilities.ShowMessageBox(
+                _package,
+                message,
+                "VSSync - Multiple Instances Found",
+                OLEMSGICON.OLEMSGICON_INFO,
+                OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+
+            // Return the first instance (most recently discovered, likely most recently active)
             return instances.FirstOrDefault();
         }
     }

@@ -7,10 +7,12 @@ import * as net from 'net';
 import * as vscode from 'vscode';
 import {
     IpcMessage,
+    MessageType,
     createMessage,
     parseMessage,
-    DiscoverPayload,
-    OpenFilePayload
+    OpenFilePayload,
+    isDiscoverPayload,
+    isOpenFilePayload
 } from './protocol';
 
 const DEFAULT_BASE_PORT = 52342;
@@ -92,10 +94,19 @@ export class IpcServer {
     private async handleMessage(socket: net.Socket, message: IpcMessage): Promise<void> {
         switch (message.type) {
             case 'DISCOVER':
-                await this.handleDiscover(socket, message.payload as unknown as DiscoverPayload);
+                if (isDiscoverPayload(message.payload)) {
+                    await this.handleDiscover(socket);
+                }
                 break;
             case 'OPEN_FILE':
-                await this.handleOpenFile(socket, message.payload as unknown as OpenFilePayload);
+                if (isOpenFilePayload(message.payload)) {
+                    await this.handleOpenFile(socket, message.payload);
+                } else {
+                    this.sendResponse(socket, 'OPEN_FILE_RESPONSE', {
+                        success: false,
+                        error: 'Invalid payload'
+                    });
+                }
                 break;
             case 'PING':
                 this.sendResponse(socket, 'PONG', {});
@@ -106,7 +117,7 @@ export class IpcServer {
     /**
      * Handle DISCOVER request
      */
-    private async handleDiscover(socket: net.Socket, _payload: DiscoverPayload): Promise<void> {
+    private async handleDiscover(socket: net.Socket): Promise<void> {
         const workspaceFolders = vscode.workspace.workspaceFolders;
         const workspacePath = workspaceFolders && workspaceFolders.length > 0 
             ? workspaceFolders[0].uri.fsPath 
@@ -177,8 +188,8 @@ export class IpcServer {
     /**
      * Send response message
      */
-    private sendResponse(socket: net.Socket, type: string, payload: Record<string, unknown>): void {
-        const response = createMessage(type as never, payload, 'vscode');
+    private sendResponse(socket: net.Socket, type: MessageType, payload: Record<string, unknown>): void {
+        const response = createMessage(type, payload, 'vscode');
         socket.write(JSON.stringify(response) + '\n');
     }
 
