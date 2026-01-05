@@ -1,0 +1,81 @@
+{
+  "name": "vssync",
+  "displayName": "VSSync - Open in Other IDE",
+  "description": "Synchronize files between VS Code and Visual Studio. Open the current file in the other IDE with a single click.",
+  "version": "1.0.0",
+  "publisher": "vssync",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "visual studio",
+    "synchronize",
+    "open file",
+    "cross-ide"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vssync.openInVisualStudio",
+        "title": "Open in Visual Studio"
+      }
+    ],
+    "menus": {
+      "editor/title/context": [
+        {
+          "command": "vssync.openInVisualStudio",
+          "group": "navigation"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "vssync.openInVisualStudio",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "VSSync",
+      "properties": {
+        "vssync.ipcPort": {
+          "type": "number",
+          "default": 52342,
+          "description": "Base port for IPC communication (will scan range port to port+100)"
+        },
+        "vssync.timeout": {
+          "type": "number",
+          "default": 5000,
+          "description": "Timeout in milliseconds for IPC communication"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "pretest": "npm run compile && npm run lint",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.0",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.3.2"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/werddomain/VSSync"
+  }
+}
