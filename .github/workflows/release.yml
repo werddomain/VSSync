@@ -101,13 +101,21 @@ jobs:
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $manifestPath = "source.extension.vsixmanifest"
-          $content = Get-Content $manifestPath -Raw -Encoding UTF8
-          # Use flexible regex to match any existing version format in Identity element
-          $content = $content -replace '(<Identity[^>]*Version=")[^"]+(")', "`$1$version`$2"
-          Set-Content $manifestPath $content -NoNewline -Encoding UTF8
+          
+          # Use XML parsing to safely update the version
+          [xml]$xml = Get-Content $manifestPath
+          $ns = New-Object System.Xml.XmlNamespaceManager($xml.NameTable)
+          $ns.AddNamespace("vs", "http://schemas.microsoft.com/developer/vsx-schema/2011")
+          $identity = $xml.SelectSingleNode("//vs:Identity", $ns)
+          $identity.SetAttribute("Version", $version)
+          
+          # Save with UTF-8 without BOM
+          $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+          $writer = New-Object System.IO.StreamWriter($manifestPath, $false, $utf8NoBom)
+          $xml.Save($writer)
+          $writer.Close()
+          
           Write-Host "Updated vsixmanifest version to $version"
-          Write-Host "Manifest content:"
-          Get-Content $manifestPath
 
       - name: Build Visual Studio Extension
         working-directory: visual-studio-extension/VSSync
