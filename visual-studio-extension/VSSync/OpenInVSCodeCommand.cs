@@ -303,11 +303,12 @@ namespace VSSync
                 // (e.g., during startup/shutdown, or when window handles are invalid)
                 VsShellUtilities.ShowMessageBox(
                     _package,
-                    "Unable to communicate with VS Code.\n\n" +
+                    "VS²Sync encountered an error while accessing Visual Studio.\n\n" +
+                    "This can happen when Visual Studio is still loading or in an unusual state.\n\n" +
                     "Please ensure:\n" +
-                    "• VS Code is running with the VS²Sync extension installed\n" +
-                    "• A folder or workspace is open in VS Code\n" +
-                    "• Visual Studio has fully loaded\n\n" +
+                    "• Visual Studio has fully loaded\n" +
+                    "• A solution or folder is open in Visual Studio\n" +
+                    "• VS Code is running with the VS²Sync extension installed\n\n" +
                     "If the problem persists, try restarting both Visual Studio and VS Code.",
                     "VS²Sync",
                     OLEMSGICON.OLEMSGICON_WARNING,
