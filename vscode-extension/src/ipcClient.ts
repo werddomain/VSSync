@@ -51,6 +51,28 @@ export class IpcClient {
     }
 
     /**
+     * Discover all active Visual Studio instances regardless of workspace
+     */
+    async discoverAllInstances(): Promise<IdeInstance[]> {
+        const instances: IdeInstance[] = [];
+        const promises: Promise<IdeInstance | null>[] = [];
+
+        for (let port = this.basePort; port < this.basePort + PORT_RANGE; port++) {
+            promises.push(this.probePortAllInstances(port));
+        }
+
+        const results = await Promise.allSettled(promises);
+        
+        for (const result of results) {
+            if (result.status === 'fulfilled' && result.value) {
+                instances.push(result.value);
+            }
+        }
+
+        return instances;
+    }
+
+    /**
      * Send an open file request to a specific IDE instance
      */
     async openFile(
@@ -164,6 +186,83 @@ export class IpcClient {
                         // Only return if it's a Visual Studio instance with matching workspace
                         if (payload.ide === 'visualstudio' && 
                             this.pathsMatch(payload.workspacePath, workspacePath)) {
+                            socket.destroy();
+                            resolve({
+                                port: payload.port,
+                                ide: payload.ide,
+                                version: payload.version,
+                                workspacePath: payload.workspacePath,
+                                solutionPath: payload.solutionPath,
+                                pid: payload.pid,
+                                windowHandle: payload.windowHandle
+                            });
+                            return;
+                        }
+                        socket.destroy();
+                        resolve(null);
+                    }
+                }
+                buffer = lines[lines.length - 1];
+            });
+
+            socket.on('error', () => {
+                clearTimeout(timeoutId);
+                socket.destroy();
+                resolve(null);
+            });
+
+            socket.on('close', () => {
+                clearTimeout(timeoutId);
+                if (!responseReceived) {
+                    resolve(null);
+                }
+            });
+        });
+    }
+
+    /**
+     * Probe a specific port for any Visual Studio instance (regardless of workspace)
+     */
+    private probePortAllInstances(port: number): Promise<IdeInstance | null> {
+        return new Promise((resolve) => {
+            const socket = new net.Socket();
+            let responseReceived = false;
+
+            const timeoutId = setTimeout(() => {
+                socket.destroy();
+                resolve(null);
+            }, CONNECTION_TIMEOUT);
+
+            socket.connect(port, '127.0.0.1', () => {
+                const payload: Record<string, unknown> = {
+                    workspacePath: ''
+                };
+                const message = createMessage('DISCOVER', payload, 'vscode');
+
+                socket.write(JSON.stringify(message) + '\n');
+            });
+
+            let buffer = '';
+            socket.on('data', (data) => {
+                buffer += data.toString();
+                const lines = buffer.split('\n');
+                
+                for (let i = 0; i < lines.length - 1; i++) {
+                    const msg = parseMessage(lines[i]);
+                    if (msg && msg.type === 'DISCOVER_RESPONSE') {
+                        responseReceived = true;
+                        clearTimeout(timeoutId);
+                        
+                        if (!isDiscoverResponsePayload(msg.payload)) {
+                            socket.destroy();
+                            resolve(null);
+                            return;
+                        }
+                        
+                        const payload = msg.payload;
+                        
+                        // Return any Visual Studio instance
+                        if (payload.ide === 'visualstudio') {
                             socket.destroy();
                             resolve({
                                 port: payload.port,

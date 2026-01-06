@@ -30,6 +30,10 @@ namespace VSSync
         private static extern uint GetCurrentThreadId();
 
         [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool IsWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
         private static extern bool BringWindowToTop(IntPtr hWnd);
 
         [DllImport("user32.dll")]
@@ -49,7 +53,12 @@ namespace VSSync
         /// </summary>
         public static bool FocusWindow(IntPtr hWnd)
         {
+            // Validate window handle to prevent E_INVALIDARG (0x80070057) errors
             if (hWnd == IntPtr.Zero)
+                return false;
+
+            // Check if the window handle is valid
+            if (!IsWindow(hWnd))
                 return false;
 
             try

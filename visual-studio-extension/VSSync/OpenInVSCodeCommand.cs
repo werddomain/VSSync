@@ -157,17 +157,63 @@ namespace VSSync
 
                     if (instances.Count == 0)
                     {
-                        dte.StatusBar.Text = "VS²Sync: No VS Code instance found";
+                        // No matching instances found, try to discover all active instances
+                        var allInstances = await _ipcClient.DiscoverAllInstancesAsync();
+                        
+                        dte.StatusBar.Text = "VS²Sync: No matching VS Code instance found";
                         dte.StatusBar.Animate(false, vsStatusAnimation.vsStatusAnimationFind);
 
-                        VsShellUtilities.ShowMessageBox(
-                            _package,
-                            "No VS Code instance found with the same workspace open.\n\n" +
-                            "Make sure VS Code has the VS²Sync extension installed and the same folder open.",
-                            "VS²Sync",
-                            OLEMSGICON.OLEMSGICON_WARNING,
-                            OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                            OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                        if (allInstances.Count == 0)
+                        {
+                            VsShellUtilities.ShowMessageBox(
+                                _package,
+                                "No VS Code instance found.\n\n" +
+                                "Make sure VS Code has the VS²Sync extension installed.",
+                                "VS²Sync",
+                                OLEMSGICON.OLEMSGICON_WARNING,
+                                OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                        }
+                        else
+                        {
+                            // Show available instances to help the user
+                            var instanceList = string.Join("\n", allInstances.Select((inst, idx) =>
+                                $"{idx + 1}. VS Code {inst.Version}\n   Path: {inst.WorkspacePath ?? "No folder open"}\n   PID: {inst.Pid}"));
+
+                            var result = VsShellUtilities.ShowMessageBox(
+                                _package,
+                                $"No VS Code instance found with the same workspace open.\n\n" +
+                                $"Active VS Code instances ({allInstances.Count}):\n{instanceList}\n\n" +
+                                $"Click OK to open in the first VS Code instance, or Cancel to abort.",
+                                "VS²Sync - No Matching Instance",
+                                OLEMSGICON.OLEMSGICON_QUERY,
+                                OLEMSGBUTTON.OLEMSGBUTTON_OKCANCEL,
+                                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+
+                            if (result == 1) // IDOK
+                            {
+                                dte.StatusBar.Animate(true, vsStatusAnimation.vsStatusAnimationFind);
+                                dte.StatusBar.Text = "VS²Sync: Opening file in VS Code...";
+                                var success = await _ipcClient.OpenFileAsync(allInstances[0], filePath, line, column);
+                                dte.StatusBar.Animate(false, vsStatusAnimation.vsStatusAnimationFind);
+
+                                if (success)
+                                {
+                                    dte.StatusBar.Text = "VS²Sync: File opened in VS Code";
+                                }
+                                else
+                                {
+                                    dte.StatusBar.Text = "VS²Sync: Failed to open file";
+                                    VsShellUtilities.ShowMessageBox(
+                                        _package,
+                                        "Failed to open file in VS Code.",
+                                        "VS²Sync",
+                                        OLEMSGICON.OLEMSGICON_WARNING,
+                                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                                }
+                            }
+                        }
                         return;
                     }
 

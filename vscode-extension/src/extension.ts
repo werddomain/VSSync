@@ -105,10 +105,38 @@ async function openInVisualStudio(uri?: vscode.Uri): Promise<void> {
                 }
 
                 if (instances.length === 0) {
-                    vscode.window.showWarningMessage(
-                        'VS²Sync: No Visual Studio instance found with the same workspace open. ' +
-                        'Make sure Visual Studio has the VS²Sync extension installed and the same solution/folder open.'
-                    );
+                    // No matching instances found, try to discover all active instances
+                    const allInstances = await ipcClient!.discoverAllInstances();
+                    
+                    if (allInstances.length === 0) {
+                        vscode.window.showWarningMessage(
+                            'VS²Sync: No Visual Studio instance found. ' +
+                            'Make sure Visual Studio has the VS²Sync extension installed.'
+                        );
+                    } else {
+                        // Show available instances to help the user
+                        const instanceList = allInstances.map(inst => 
+                            `• VS ${inst.version} - ${inst.solutionPath || inst.workspacePath || 'No solution open'} (PID: ${inst.pid})`
+                        ).join('\n');
+                        
+                        const openAnyway = await vscode.window.showWarningMessage(
+                            `VS²Sync: No Visual Studio instance found with the same workspace open.\n\n` +
+                            `Active Visual Studio instances (${allInstances.length}):\n${instanceList}`,
+                            { modal: true },
+                            'Open in First Instance',
+                            'Cancel'
+                        );
+                        
+                        if (openAnyway === 'Open in First Instance' && allInstances.length > 0) {
+                            progress.report({ message: 'Opening file in Visual Studio...' });
+                            const success = await ipcClient!.openFile(allInstances[0], filePath, line, column);
+                            if (success) {
+                                vscode.window.setStatusBarMessage('VS²Sync: File opened in Visual Studio', 3000);
+                            } else {
+                                vscode.window.showErrorMessage('VS²Sync: Failed to open file in Visual Studio');
+                            }
+                        }
+                    }
                     return;
                 }
 
