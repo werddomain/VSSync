@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using EnvDTE;
 using EnvDTE80;
@@ -296,11 +297,42 @@ namespace VSSync
                     dte.StatusBar.Animate(false, vsStatusAnimation.vsStatusAnimationFind);
                 }
             }
+            catch (COMException comEx) when (comEx.HResult == unchecked((int)0x80070057)) // E_INVALIDARG
+            {
+                // E_INVALIDARG can occur when Visual Studio is in an unusual state
+                // (e.g., during startup/shutdown, or when window handles are invalid)
+                VsShellUtilities.ShowMessageBox(
+                    _package,
+                    "Unable to communicate with VS Code.\n\n" +
+                    "Please ensure:\n" +
+                    "• VS Code is running with the VS²Sync extension installed\n" +
+                    "• A folder or workspace is open in VS Code\n" +
+                    "• Visual Studio has fully loaded\n\n" +
+                    "If the problem persists, try restarting both Visual Studio and VS Code.",
+                    "VS²Sync",
+                    OLEMSGICON.OLEMSGICON_WARNING,
+                    OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+            }
+            catch (COMException comEx)
+            {
+                // Other COM exceptions - provide a helpful message with the error code
+                VsShellUtilities.ShowMessageBox(
+                    _package,
+                    $"A Visual Studio communication error occurred (0x{comEx.HResult:X8}).\n\n" +
+                    "Please ensure Visual Studio has fully loaded and try again.\n" +
+                    "If the problem persists, try restarting Visual Studio.",
+                    "VS²Sync Error",
+                    OLEMSGICON.OLEMSGICON_WARNING,
+                    OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                    OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+            }
             catch (Exception ex)
             {
                 VsShellUtilities.ShowMessageBox(
                     _package,
-                    $"An error occurred: {ex.Message}",
+                    $"An unexpected error occurred: {ex.Message}\n\n" +
+                    "Please try again. If the problem persists, restart Visual Studio and VS Code.",
                     "VS²Sync Error",
                     OLEMSGICON.OLEMSGICON_CRITICAL,
                     OLEMSGBUTTON.OLEMSGBUTTON_OK,
