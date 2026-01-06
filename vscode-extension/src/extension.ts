@@ -1,5 +1,5 @@
 /**
- * VSSync - VS Code Extension
+ * VS²Sync - VS Code Extension
  * Main extension entry point
  */
 
@@ -15,7 +15,7 @@ let ipcClient: IpcClient | null = null;
 const instanceChoiceCache = new Map<string, IdeInstance>();
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
-    console.log('VSSync extension is now active');
+    console.log('VS²Sync extension is now active');
 
     // Get configuration
     const config = vscode.workspace.getConfiguration('vssync');
@@ -29,11 +29,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     ipcServer = new IpcServer(basePort);
     try {
         const port = await ipcServer.start();
-        console.log(`VSSync IPC server started on port ${port}`);
+        console.log(`VS²Sync IPC server started on port ${port}`);
     } catch (error) {
-        console.error('Failed to start VSSync IPC server:', error);
+        console.error('Failed to start VS²Sync IPC server:', error);
         vscode.window.showWarningMessage(
-            'VSSync: Failed to start IPC server. Incoming requests from Visual Studio will not work.'
+            'VS²Sync: Failed to start IPC server. Incoming requests from Visual Studio will not work.'
         );
     }
 
@@ -71,7 +71,7 @@ async function openInVisualStudio(uri?: vscode.Uri): Promise<void> {
     } else {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            vscode.window.showWarningMessage('VSSync: No active file to open');
+            vscode.window.showWarningMessage('VS²Sync: No active file to open');
             return;
         }
         filePath = editor.document.uri.fsPath;
@@ -82,7 +82,7 @@ async function openInVisualStudio(uri?: vscode.Uri): Promise<void> {
     // Get the workspace path
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (!workspaceFolders || workspaceFolders.length === 0) {
-        vscode.window.showWarningMessage('VSSync: No workspace folder open');
+        vscode.window.showWarningMessage('VS²Sync: No workspace folder open');
         return;
     }
 
@@ -92,7 +92,7 @@ async function openInVisualStudio(uri?: vscode.Uri): Promise<void> {
     await vscode.window.withProgress(
         {
             location: vscode.ProgressLocation.Notification,
-            title: 'VSSync: Searching for Visual Studio instances...',
+            title: 'VS²Sync: Searching for Visual Studio instances...',
             cancellable: true
         },
         async (progress, token) => {
@@ -106,8 +106,8 @@ async function openInVisualStudio(uri?: vscode.Uri): Promise<void> {
 
                 if (instances.length === 0) {
                     vscode.window.showWarningMessage(
-                        'VSSync: No Visual Studio instance found with the same workspace open. ' +
-                        'Make sure Visual Studio has the VSSync extension installed and the same solution/folder open.'
+                        'VS²Sync: No Visual Studio instance found with the same workspace open. ' +
+                        'Make sure Visual Studio has the VS²Sync extension installed and the same solution/folder open.'
                     );
                     return;
                 }
@@ -133,7 +133,7 @@ async function openInVisualStudio(uri?: vscode.Uri): Promise<void> {
 
                         const selected = await vscode.window.showQuickPick(items, {
                             placeHolder: 'Multiple Visual Studio instances found. Select one:',
-                            title: 'VSSync - Select Target Instance'
+                            title: 'VS²Sync - Select Target Instance'
                         });
 
                         if (!selected) {
@@ -158,15 +158,15 @@ async function openInVisualStudio(uri?: vscode.Uri): Promise<void> {
 
                 if (success) {
                     // Show brief notification
-                    vscode.window.setStatusBarMessage('VSSync: File opened in Visual Studio', 3000);
+                    vscode.window.setStatusBarMessage('VS²Sync: File opened in Visual Studio', 3000);
                 } else {
                     vscode.window.showErrorMessage(
-                        'VSSync: Failed to open file in Visual Studio'
+                        'VS²Sync: Failed to open file in Visual Studio'
                     );
                 }
             } catch (error) {
                 const message = error instanceof Error ? error.message : 'Unknown error';
-                vscode.window.showErrorMessage(`VSSync: Error - ${message}`);
+                vscode.window.showErrorMessage(`VS²Sync: Error - ${message}`);
             }
         }
     );

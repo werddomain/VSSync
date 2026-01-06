@@ -68,13 +68,13 @@ jobs:
 
       - name: Package VS Code Extension
         working-directory: vscode-extension
-        run: vsce package --out vssync-${{ needs.prepare.outputs.version }}.vsix
+        run: vsce package --out vs-2-sync-${{ needs.prepare.outputs.version }}.vsix
 
       - name: Upload VS Code Extension artifact
         uses: actions/upload-artifact@v4
         with:
           name: vscode-extension-vsix
-          path: vscode-extension/vssync-${{ needs.prepare.outputs.version }}.vsix
+          path: vscode-extension/vs-2-sync-${{ needs.prepare.outputs.version }}.vsix
 
       - name: Publish to VS Code Marketplace
         if: ${{ vars.PUBLISH_VSCODE_MARKETPLACE == 'true' }}
@@ -128,7 +128,7 @@ jobs:
         run: |
           $vsix = Get-ChildItem -Path "bin/Release" -Filter "*.vsix" | Select-Object -First 1
           if ($vsix) {
-            $newName = "VSSync-VisualStudio-${{ needs.prepare.outputs.version }}.vsix"
+            $newName = "VS-2-Sync-VisualStudio-${{ needs.prepare.outputs.version }}.vsix"
             Move-Item $vsix.FullName "bin/Release/$newName"
             Write-Host "Renamed to $newName"
           } else {

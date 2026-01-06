@@ -50,7 +50,7 @@ namespace VSSync
                     _listener = new TcpListener(IPAddress.Loopback, port);
                     _listener.Start();
                     _port = port;
-                    Debug.WriteLine($"VSSync IPC server started on port {port}");
+                    Debug.WriteLine($"VS²Sync IPC server started on port {port}");
                     break;
                 }
                 catch (SocketException)
@@ -61,7 +61,7 @@ namespace VSSync
 
             if (_listener == null)
             {
-                Debug.WriteLine("VSSync: Failed to start IPC server - no available port");
+                Debug.WriteLine("VS²Sync: Failed to start IPC server - no available port");
                 return;
             }
 
@@ -94,7 +94,7 @@ namespace VSSync
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine($"VSSync: Error accepting connection: {ex.Message}");
+                    Debug.WriteLine($"VS²Sync: Error accepting connection: {ex.Message}");
                 }
             }
         }
@@ -127,14 +127,14 @@ namespace VSSync
                         }
                         catch (JsonException ex)
                         {
-                            Debug.WriteLine($"VSSync: JSON parse error: {ex.Message}");
+                            Debug.WriteLine($"VS²Sync: JSON parse error: {ex.Message}");
                         }
                     }
                 }
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"VSSync: Client handling error: {ex.Message}");
+                Debug.WriteLine($"VS²Sync: Client handling error: {ex.Message}");
             }
         }
 
@@ -271,7 +271,7 @@ namespace VSSync
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"VSSync: Failed to focus window: {ex.Message}");
+                Debug.WriteLine($"VS²Sync: Failed to focus window: {ex.Message}");
             }
         }
 

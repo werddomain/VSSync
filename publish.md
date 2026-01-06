@@ -1,6 +1,6 @@
-# Publishing VSSync Extensions
+# Publishing VS²Sync Extensions
 
-This guide explains how to publish VSSync extensions to the VS Code Marketplace and Visual Studio Marketplace.
+This guide explains how to publish VS²Sync extensions to the VS Code Marketplace and Visual Studio Marketplace.
 
 ## Table of Contents
 
@@ -12,7 +12,7 @@ This guide explains how to publish VSSync extensions to the VS Code Marketplace 
 
 ## Version Tagging
 
-VSSync uses Git tags to manage versions. When you push a version tag (without ending with 'b'), the GitHub Action automatically creates a release and optionally publishes to the marketplaces.
+VS²Sync uses Git tags to manage versions. When you push a version tag (without ending with 'b'), the GitHub Action automatically creates a release and optionally publishes to the marketplaces.
 
 ### Tag Format
 
@@ -179,7 +179,7 @@ To enable automated publishing to marketplaces, you need to configure repository
      },
      "overview": "../../README.md",
      "priceCategory": "free",
-     "publisher": "VSSync",
+     "publisher": "VS-2-Sync",
      "repo": "https://github.com/werddomain/VSSync"
    }
    ```
@@ -229,8 +229,8 @@ git push origin v1.0.0
    - Builds Visual Studio extension (Windows runner)
 
 2. **Artifacts Created**
-   - `vssync-{version}.vsix` - VS Code extension
-   - `VSSync-VisualStudio-{version}.vsix` - Visual Studio extension
+   - `vs-2-sync-{version}.vsix` - VS Code extension
+   - `VS-2-Sync-VisualStudio-{version}.vsix` - Visual Studio extension
 
 3. **GitHub Release Created**
    - Release named "Release v{version}"
@@ -296,7 +296,7 @@ vsce publish -p <YOUR_PAT>
 
 If you encounter issues:
 1. Check the GitHub Actions logs for detailed error messages
-2. Open an issue at [VSSync Issues](https://github.com/werddomain/VSSync/issues)
+2. Open an issue at [VS²Sync Issues](https://github.com/werddomain/VSSync/issues)
 
 ## Quick Reference
 
