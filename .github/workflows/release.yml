@@ -144,18 +144,28 @@ jobs:
         env:
           VS_MARKETPLACE_PAT: ${{ secrets.VS_MARKETPLACE_PAT }}
         run: |
-          # Install VsixPublisher if not available
-          $vsixPublisher = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
-          if (-not (Test-Path $vsixPublisher)) {
-            Write-Host "VsixPublisher not found at expected path. Attempting alternative..."
-            $vsixPublisher = (Get-ChildItem -Path "${env:ProgramFiles}" -Recurse -Filter "VsixPublisher.exe" -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+          # Check known Visual Studio installation paths for VsixPublisher
+          $vsEditions = @("Enterprise", "Professional", "Community", "BuildTools")
+          $vsVersions = @("2022", "2019")
+          $vsixPublisher = $null
+          
+          foreach ($version in $vsVersions) {
+            foreach ($edition in $vsEditions) {
+              $path = "${env:ProgramFiles}\Microsoft Visual Studio\$version\$edition\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
+              if (Test-Path $path) {
+                $vsixPublisher = $path
+                Write-Host "Found VsixPublisher at: $path"
+                break
+              }
+            }
+            if ($vsixPublisher) { break }
           }
           
           if ($vsixPublisher -and (Test-Path $vsixPublisher)) {
             $vsix = Get-ChildItem -Path "bin/Release" -Filter "*.vsix" | Select-Object -First 1
             & $vsixPublisher publish -payload $vsix.FullName -publishManifest publish-manifest.json -personalAccessToken $env:VS_MARKETPLACE_PAT
           } else {
-            Write-Host "::warning::VsixPublisher not found. Please publish manually or configure the workflow with proper VS SDK installation."
+            Write-Host "::warning::VsixPublisher not found in common Visual Studio paths. Please publish manually or ensure VS SDK is installed."
           }
 
   # Create GitHub Release

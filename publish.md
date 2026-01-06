@@ -177,7 +177,7 @@ To enable automated publishing to marketplaces, you need to configure repository
      "identity": {
        "internalName": "VSSync"
      },
-     "overview": "README.md",
+     "overview": "../../README.md",
      "priceCategory": "free",
      "publisher": "YourPublisherName",
      "repo": "https://github.com/werddomain/VSSync"
