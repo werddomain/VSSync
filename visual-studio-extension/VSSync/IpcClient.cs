@@ -198,8 +198,8 @@ namespace VSSync
                                     {
                                         Port = payload.Port,
                                         Ide = IdeType.vscode,
-                                        Version = payload.Version,
-                                        WorkspacePath = payload.WorkspacePath,
+                                        Version = payload.Version ?? string.Empty,
+                                        WorkspacePath = payload.WorkspacePath ?? string.Empty,
                                         SolutionPath = payload.SolutionPath,
                                         Pid = payload.Pid,
                                         WindowHandle = new IntPtr(payload.WindowHandle)

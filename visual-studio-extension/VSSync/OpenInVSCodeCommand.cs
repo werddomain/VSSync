@@ -112,7 +112,19 @@ namespace VSSync
             try
             {
                 var dte = await ServiceProvider.GetServiceAsync(typeof(DTE)) as DTE2;
-                if (dte?.ActiveDocument == null)
+                if (dte == null)
+                {
+                    VsShellUtilities.ShowMessageBox(
+                        _package,
+                        "Unable to access Visual Studio automation object.",
+                        "VS²Sync",
+                        OLEMSGICON.OLEMSGICON_WARNING,
+                        OLEMSGBUTTON.OLEMSGBUTTON_OK,
+                        OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+                    return;
+                }
+
+                if (dte.ActiveDocument == null)
                 {
                     VsShellUtilities.ShowMessageBox(
                         _package,
@@ -194,10 +206,10 @@ namespace VSSync
                             {
                                 dte.StatusBar.Animate(true, vsStatusAnimation.vsStatusAnimationFind);
                                 dte.StatusBar.Text = "VS²Sync: Opening file in VS Code...";
-                                var success = await _ipcClient.OpenFileAsync(allInstances[0], filePath, line, column);
+                                var openSuccess = await _ipcClient.OpenFileAsync(allInstances[0], filePath, line, column);
                                 dte.StatusBar.Animate(false, vsStatusAnimation.vsStatusAnimationFind);
 
-                                if (success)
+                                if (openSuccess)
                                 {
                                     dte.StatusBar.Text = "VS²Sync: File opened in VS Code";
                                 }
