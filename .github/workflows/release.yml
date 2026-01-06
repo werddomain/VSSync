@@ -112,7 +112,7 @@ jobs:
         shell: pwsh
         run: |
           # Build with MSBuild - classic project format uses PackageReference with restore built-in
-          msbuild VSSync.csproj /t:Restore;Build /p:Configuration=Release /p:DeployExtension=false
+          msbuild VSSync.csproj "/t:Restore;Build" /p:Configuration=Release /p:DeployExtension=false
 
       - name: Find and rename VSIX
         working-directory: visual-studio-extension/VSSync
