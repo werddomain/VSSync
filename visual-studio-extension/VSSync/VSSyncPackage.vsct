@@ -32,6 +32,13 @@
     </Bitmaps>
   </Commands>
 
+  <KeyBindings>
+    <KeyBinding guid="guidVSSyncPackageCmdSet" id="OpenInVSCodeCommandId" 
+                editor="guidVSStd97" 
+                key1="V" mod1="Control Shift" 
+                key2="S" />
+  </KeyBindings>
+
   <CommandPlacements>
     <!-- Place command in document tab context menu -->
     <CommandPlacement guid="guidVSSyncPackageCmdSet" id="OpenInVSCodeCommandId" priority="0x0100">
