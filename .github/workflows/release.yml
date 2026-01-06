@@ -92,12 +92,6 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2
-
       - name: Update version in vsixmanifest
         working-directory: visual-studio-extension/VSSync
         shell: pwsh
@@ -110,13 +104,9 @@ jobs:
           Set-Content $manifestPath $content
           Write-Host "Updated vsixmanifest version to $version"
 
-      - name: Restore packages
-        working-directory: visual-studio-extension/VSSync
-        run: dotnet restore VSSync.csproj
-
       - name: Build Visual Studio Extension
         working-directory: visual-studio-extension/VSSync
-        run: msbuild VSSync.csproj /p:Configuration=Release /p:DeployExtension=false /p:CreateVsixContainer=true
+        run: dotnet build VSSync.csproj -c Release /p:DeployExtension=false
 
       - name: Find and rename VSIX
         working-directory: visual-studio-extension/VSSync
