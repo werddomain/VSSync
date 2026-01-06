@@ -155,7 +155,7 @@ npm run compile
 **Visual Studio Extension:**
 ```bash
 cd visual-studio-extension/VSSync
-dotnet build
+msbuild /t:Restore;Build
 ```
 
 ### Debugging
