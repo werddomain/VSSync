@@ -1,5 +1,11 @@
 # VS²Sync - Open in Other IDE
 
+[![Release](https://img.shields.io/github/v/release/werddomain/VSSync?style=flat-square)](https://github.com/werddomain/VSSync/releases)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/werddomain/VSSync/release.yml?style=flat-square&label=build)](https://github.com/werddomain/VSSync/actions/workflows/release.yml)
+[![License](https://img.shields.io/github/license/werddomain/VSSync?style=flat-square)](LICENSE)
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/VS-2-Sync.vs-2-sync?style=flat-square&label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=VS-2-Sync.vs-2-sync)
+[![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/VS-2-Sync.VSSync?style=flat-square&label=Visual%20Studio)](https://marketplace.visualstudio.com/items?itemName=VS-2-Sync.VSSync)
+
 A suite of synchronized extensions for **Visual Studio Code** and **Visual Studio** that allows you to open the current file in the other IDE with a single click.
 
 ## Features
