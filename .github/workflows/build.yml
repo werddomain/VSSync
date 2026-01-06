@@ -1,0 +1,48 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-vscode:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: vscode-extension/package-lock.json
+
+      - name: Install dependencies
+        working-directory: vscode-extension
+        run: npm ci
+
+      - name: Lint
+        working-directory: vscode-extension
+        run: npm run lint
+
+      - name: Compile
+        working-directory: vscode-extension
+        run: npm run compile
+
+  build-visual-studio:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build Visual Studio Extension
+        working-directory: visual-studio-extension/VSSync
+        shell: pwsh
+        run: |
+          msbuild VSSync.csproj "/t:Restore;Build" /p:Configuration=Release /p:DeployExtension=false
