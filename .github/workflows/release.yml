@@ -122,14 +122,19 @@ jobs:
         working-directory: visual-studio-extension/VSSync
         shell: pwsh
         run: |
-          $vsix = Get-ChildItem -Path "bin/Release" -Filter "*.vsix" | Select-Object -First 1
+          # Search recursively for VSIX files in bin/Release
+          $vsix = Get-ChildItem -Path "bin/Release" -Filter "*.vsix" -Recurse | Select-Object -First 1
           if ($vsix) {
             $newName = "VS-2-Sync-VisualStudio-${{ needs.prepare.outputs.version }}.vsix"
-            Move-Item $vsix.FullName "bin/Release/$newName"
+            $destPath = "bin/Release/$newName"
+            Move-Item $vsix.FullName $destPath
             Write-Host "Renamed to $newName"
+            Write-Host "File location: $destPath"
           } else {
-            Write-Host "No VSIX found in bin/Release"
+            Write-Host "::error::No VSIX found in bin/Release"
+            Write-Host "Contents of bin/Release:"
             Get-ChildItem -Path "bin/Release" -Recurse
+            exit 1
           }
 
       - name: Upload Visual Studio Extension artifact
@@ -137,6 +142,7 @@ jobs:
         with:
           name: vs-extension-vsix
           path: visual-studio-extension/VSSync/bin/Release/*.vsix
+          if-no-files-found: error
 
       - name: Publish to Visual Studio Marketplace
         if: ${{ vars.PUBLISH_VS_MARKETPLACE == 'true' }}
