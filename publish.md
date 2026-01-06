@@ -179,10 +179,12 @@ To enable automated publishing to marketplaces, you need to configure repository
      },
      "overview": "../../README.md",
      "priceCategory": "free",
-     "publisher": "YourPublisherName",
+     "publisher": "vssync",
      "repo": "https://github.com/werddomain/VSSync"
    }
    ```
+
+   > **Note:** Replace `"publisher": "vssync"` with your actual marketplace publisher ID if different.
 
 4. **Configure GitHub Secrets**
    - Add a new repository secret:
