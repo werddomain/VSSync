@@ -149,7 +149,7 @@ jobs:
         env:
           VS_MARKETPLACE_PAT: ${{ secrets.VS_MARKETPLACE_PAT }}
         run: |
-          # Build list of possible VsixPublisher paths
+          # Build list of possible VsixPublisher paths (VS 2022, 2019 editions)
           $paths = @(
             "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
             "${env:ProgramFiles}\Microsoft Visual Studio\2022\Professional\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
@@ -157,7 +157,8 @@ jobs:
             "${env:ProgramFiles}\Microsoft Visual Studio\2022\BuildTools\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
             "${env:ProgramFiles}\Microsoft Visual Studio\2019\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
             "${env:ProgramFiles}\Microsoft Visual Studio\2019\Professional\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
-            "${env:ProgramFiles}\Microsoft Visual Studio\2019\Community\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
+            "${env:ProgramFiles}\Microsoft Visual Studio\2019\Community\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
+            "${env:ProgramFiles}\Microsoft Visual Studio\2019\BuildTools\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
           )
           
           $vsixPublisher = $paths | Where-Object { Test-Path $_ } | Select-Object -First 1
