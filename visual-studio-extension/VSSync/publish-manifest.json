@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json.schemastore.org/vsix-publish",
+  "categories": ["Tools"],
+  "identity": {
+    "internalName": "VSSync"
+  },
+  "overview": "../../README.md",
+  "priceCategory": "free",
+  "publisher": "VSSync",
+  "repo": "https://github.com/werddomain/VSSync"
+}
