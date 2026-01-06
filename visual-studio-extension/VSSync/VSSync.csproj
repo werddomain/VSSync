@@ -14,6 +14,10 @@
     <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
     <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
     <EnableDefaultItems>true</EnableDefaultItems>
+    <!-- VSIX creation settings -->
+    <CreateVsixContainer>true</CreateVsixContainer>
+    <DeployExtension Condition="'$(Configuration)' == 'Release'">false</DeployExtension>
+    <CopyVsixManifestToOutput>true</CopyVsixManifestToOutput>
   </PropertyGroup>
 
   <ItemGroup>
