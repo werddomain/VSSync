@@ -52,3 +52,24 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+.npm
+
+# VS Code Extension
+vscode-extension/out/
+vscode-extension/*.vsix
+
+# Visual Studio Extension
+*.vsix
+.vs/
+
+# IDE
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates

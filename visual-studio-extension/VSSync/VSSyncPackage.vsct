@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <Extern href="stdidcmd.h"/>
+  <Extern href="vsshlids.h"/>
+
+  <Commands package="guidVSSyncPackage">
+    <Groups>
+      <!-- Group for the document tab context menu -->
+      <Group guid="guidVSSyncPackageCmdSet" id="VSSyncMenuGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_EZDOCWINTAB"/>
+      </Group>
+      <!-- Group for the editor title context menu -->
+      <Group guid="guidVSSyncPackageCmdSet" id="VSSyncEditorTitleGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_CODEWIN"/>
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidVSSyncPackageCmdSet" id="OpenInVSCodeCommandId" priority="0x0100" type="Button">
+        <Parent guid="guidVSSyncPackageCmdSet" id="VSSyncMenuGroup" />
+        <Icon guid="guidImages" id="bmpVSCode" />
+        <Strings>
+          <ButtonText>Open in VS Code</ButtonText>
+          <LocCanonicalName>VSSync.OpenInVSCode</LocCanonicalName>
+        </Strings>
+      </Button>
+    </Buttons>
+
+    <Bitmaps>
+      <Bitmap guid="guidImages" href="Resources\VSCodeIcon.png" usedList="bmpVSCode"/>
+    </Bitmaps>
+  </Commands>
+
+  <CommandPlacements>
+    <!-- Place command in document tab context menu -->
+    <CommandPlacement guid="guidVSSyncPackageCmdSet" id="OpenInVSCodeCommandId" priority="0x0100">
+      <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_EZDOCWINTAB"/>
+    </CommandPlacement>
+    <!-- Place command in code window context menu -->
+    <CommandPlacement guid="guidVSSyncPackageCmdSet" id="OpenInVSCodeCommandId" priority="0x0100">
+      <Parent guid="guidVSSyncPackageCmdSet" id="VSSyncEditorTitleGroup"/>
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <Symbols>
+    <GuidSymbol name="guidVSSyncPackage" value="{d7b9c0e0-8c5d-4e4f-b8a7-0c1d2e3f4a5b}" />
+
+    <GuidSymbol name="guidVSSyncPackageCmdSet" value="{d7b9c0e0-8c5d-4e4f-b8a7-0c1d2e3f4a5c}">
+      <IDSymbol name="VSSyncMenuGroup" value="0x1020" />
+      <IDSymbol name="VSSyncEditorTitleGroup" value="0x1021" />
+      <IDSymbol name="OpenInVSCodeCommandId" value="0x0100" />
+    </GuidSymbol>
+
+    <GuidSymbol name="guidImages" value="{d7b9c0e0-8c5d-4e4f-b8a7-0c1d2e3f4a5d}" >
+      <IDSymbol name="bmpVSCode" value="1" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>
