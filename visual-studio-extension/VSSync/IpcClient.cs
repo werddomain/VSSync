@@ -183,15 +183,20 @@ namespace VSSync
                             if (responseMsg?.Type == "DISCOVER_RESPONSE")
                             {
                                 var payload = ((JObject)responseMsg.Payload).ToObject<DiscoverResponsePayload>();
+                                if (payload == null)
+                                {
+                                    return null;
+                                }
+                                
                                 // Check if we should return this instance
-                                bool isVsCode = payload != null && payload.Ide == "vscode";
-                                bool workspaceMatches = !matchWorkspace || PathsMatch(payload?.WorkspacePath ?? "", workspacePath);
+                                bool isVsCode = payload.Ide == "vscode";
+                                bool workspaceMatches = !matchWorkspace || PathsMatch(payload.WorkspacePath ?? "", workspacePath);
                                 
                                 if (isVsCode && workspaceMatches)
                                 {
                                     return new IdeInstance
                                     {
-                                        Port = payload!.Port,
+                                        Port = payload.Port,
                                         Ide = IdeType.vscode,
                                         Version = payload.Version,
                                         WorkspacePath = payload.WorkspacePath,
