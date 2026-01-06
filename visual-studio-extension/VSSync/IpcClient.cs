@@ -176,7 +176,30 @@ namespace VSSync
 
         private static string NormalizePath(string path)
         {
-            return path.Replace("\\", "/").ToLowerInvariant();
+            // Handle empty paths
+            if (string.IsNullOrEmpty(path))
+            {
+                return string.Empty;
+            }
+
+            // Normalize path separators and resolve .. and .
+            var normalized = Path.GetFullPath(path);
+
+            // Convert backslashes to forward slashes for consistency
+            normalized = normalized.Replace("\\", "/");
+
+            // Remove trailing separator (unless it's a root path like "/" or "C:/")
+            if (normalized.Length > 1 && normalized.EndsWith("/"))
+            {
+                var withoutTrailing = normalized.Substring(0, normalized.Length - 1);
+                // Keep trailing slash only for root paths like "C:"
+                if (withoutTrailing.Length != 2 || withoutTrailing[1] != ':')
+                {
+                    normalized = withoutTrailing;
+                }
+            }
+
+            return normalized.ToLowerInvariant();
         }
 
         private static bool PathsMatch(string path1, string path2)
