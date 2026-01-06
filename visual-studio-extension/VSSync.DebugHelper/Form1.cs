@@ -75,7 +75,11 @@ public partial class Form1 : Form
             return;
         }
 
-        var instance = (IdeInstance)_listViewInstances.SelectedItems[0].Tag!;
+        if (_listViewInstances.SelectedItems[0].Tag is not IdeInstance instance)
+        {
+            MessageBox.Show("Invalid instance selected.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return;
+        }
         var line = (int)_numLine.Value;
         var column = (int)_numColumn.Value;
 

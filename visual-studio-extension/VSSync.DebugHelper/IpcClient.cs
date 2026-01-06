@@ -199,7 +199,7 @@ public class IpcClient
 
         if (normalized.Length > 1 && normalized.EndsWith("/"))
         {
-            var withoutTrailing = normalized[..^1];
+            var withoutTrailing = normalized.Substring(0, normalized.Length - 1);
             if (withoutTrailing.Length != 2 || withoutTrailing[1] != ':')
             {
                 normalized = withoutTrailing;
