@@ -101,11 +101,13 @@ jobs:
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $manifestPath = "source.extension.vsixmanifest"
-          $content = Get-Content $manifestPath -Raw
+          $content = Get-Content $manifestPath -Raw -Encoding UTF8
           # Use flexible regex to match any existing version format in Identity element
           $content = $content -replace '(<Identity[^>]*Version=")[^"]+(")', "`$1$version`$2"
-          Set-Content $manifestPath $content
+          Set-Content $manifestPath $content -NoNewline -Encoding UTF8
           Write-Host "Updated vsixmanifest version to $version"
+          Write-Host "Manifest content:"
+          Get-Content $manifestPath
 
       - name: Build Visual Studio Extension
         working-directory: visual-studio-extension/VSSync
