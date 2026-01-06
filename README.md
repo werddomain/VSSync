@@ -11,7 +11,7 @@ A suite of synchronized extensions for **Visual Studio Code** and **Visual Studi
 ## Features
 
 - **Cross-IDE File Opening**: Open the current file in VS Code from Visual Studio, or vice versa
-- **Keyboard Shortcut**: Quick access with `Ctrl+Shift+V, S` on both IDEs
+- **Keyboard Shortcut**: Quick access with chord shortcut (press `Ctrl+Shift+V` then `S`) on both IDEs
 - **Cursor Position Sync**: Maintains line and column position when switching IDEs
 - **Workspace Matching**: Automatically finds the matching IDE instance with the same workspace/solution open
 - **Multiple Instance Support**: Handles multiple IDE instances gracefully, remembering your choice per session
@@ -51,13 +51,13 @@ npm run compile
 ### From VS Code
 1. Open a file in your workspace
 2. **Right-click** on the editor tab or title and select "Open in Visual Studio"
-3. **OR use the keyboard shortcut**: `Ctrl+Shift+V, S` (press `Ctrl+Shift+V`, then press `S`)
-   - On macOS: `Cmd+Shift+V, S`
+3. **OR use the keyboard shortcut**: Press `Ctrl+Shift+V`, then press `S`
+   - On macOS: Press `Cmd+Shift+V`, then press `S`
 
 ### From Visual Studio
 1. Open a file in your solution
 2. **Right-click** on the document tab and select "Open in VS Code"
-3. **OR use the keyboard shortcut**: `Ctrl+Shift+V, S` (press `Ctrl+Shift+V`, then press `S`)
+3. **OR use the keyboard shortcut**: Press `Ctrl+Shift+V`, then press `S`
 
 ## Requirements
 
