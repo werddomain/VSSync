@@ -130,6 +130,16 @@ namespace VSSync
 
         private async Task<IdeInstance?> ProbePortAsync(int port, string workspacePath)
         {
+            return await ProbePortInternalAsync(port, workspacePath, matchWorkspace: true);
+        }
+
+        private async Task<IdeInstance?> ProbePortAllAsync(int port)
+        {
+            return await ProbePortInternalAsync(port, string.Empty, matchWorkspace: false);
+        }
+
+        private async Task<IdeInstance?> ProbePortInternalAsync(int port, string workspacePath, bool matchWorkspace)
+        {
             try
             {
                 using (var client = new TcpClient())
@@ -173,83 +183,15 @@ namespace VSSync
                             if (responseMsg?.Type == "DISCOVER_RESPONSE")
                             {
                                 var payload = ((JObject)responseMsg.Payload).ToObject<DiscoverResponsePayload>();
-                                if (payload != null && payload.Ide == "vscode" && PathsMatch(payload.WorkspacePath, workspacePath))
+                                // Check if we should return this instance
+                                bool isVsCode = payload != null && payload.Ide == "vscode";
+                                bool workspaceMatches = !matchWorkspace || PathsMatch(payload?.WorkspacePath ?? "", workspacePath);
+                                
+                                if (isVsCode && workspaceMatches)
                                 {
                                     return new IdeInstance
                                     {
-                                        Port = payload.Port,
-                                        Ide = IdeType.vscode,
-                                        Version = payload.Version,
-                                        WorkspacePath = payload.WorkspacePath,
-                                        SolutionPath = payload.SolutionPath,
-                                        Pid = payload.Pid,
-                                        WindowHandle = new IntPtr(payload.WindowHandle)
-                                    };
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"VSSync: Error probing port {port}: {ex.Message}");
-            }
-
-            return null;
-        }
-
-        private async Task<IdeInstance?> ProbePortAllAsync(int port)
-        {
-            try
-            {
-                using (var client = new TcpClient())
-                {
-                    var connectTask = client.ConnectAsync("127.0.0.1", port);
-                    if (await Task.WhenAny(connectTask, Task.Delay(ConnectionTimeoutMs)) != connectTask)
-                    {
-                        return null;
-                    }
-
-                    try
-                    {
-                        await connectTask;
-                    }
-                    catch
-                    {
-                        return null;
-                    }
-
-                    using (var stream = client.GetStream())
-                    using (var reader = new StreamReader(stream, Encoding.UTF8))
-                    using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
-                    {
-                        var message = IpcMessage.Create(MessageType.DISCOVER, new DiscoverPayload
-                        {
-                            WorkspacePath = string.Empty
-                        }, IdeType.visualstudio);
-
-                        await writer.WriteLineAsync(JsonConvert.SerializeObject(message));
-
-                        var readTask = reader.ReadLineAsync();
-                        if (await Task.WhenAny(readTask, Task.Delay(ConnectionTimeoutMs)) != readTask)
-                        {
-                            return null;
-                        }
-
-                        var response = await readTask;
-                        if (response != null)
-                        {
-                            var responseMsg = JsonConvert.DeserializeObject<IpcMessage>(response);
-                            if (responseMsg?.Type == "DISCOVER_RESPONSE")
-                            {
-                                var payload = ((JObject)responseMsg.Payload).ToObject<DiscoverResponsePayload>();
-                                // Return any VS Code instance, regardless of workspace
-                                if (payload != null && payload.Ide == "vscode")
-                                {
-                                    return new IdeInstance
-                                    {
-                                        Port = payload.Port,
+                                        Port = payload!.Port,
                                         Ide = IdeType.vscode,
                                         Version = payload.Version,
                                         WorkspacePath = payload.WorkspacePath,

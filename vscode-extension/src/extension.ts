@@ -115,13 +115,14 @@ async function openInVisualStudio(uri?: vscode.Uri): Promise<void> {
                         );
                     } else {
                         // Show available instances to help the user
-                        const instanceList = allInstances.map(inst => 
-                            `• VS ${inst.version} - ${inst.solutionPath || inst.workspacePath || 'No solution open'} (PID: ${inst.pid})`
+                        const instanceList = allInstances.map((inst, idx) => 
+                            `${idx + 1}. Visual Studio ${inst.version}\n   Path: ${inst.solutionPath || inst.workspacePath || 'No solution open'}\n   PID: ${inst.pid}`
                         ).join('\n');
                         
                         const openAnyway = await vscode.window.showWarningMessage(
                             `VS²Sync: No Visual Studio instance found with the same workspace open.\n\n` +
-                            `Active Visual Studio instances (${allInstances.length}):\n${instanceList}`,
+                            `Active Visual Studio instances (${allInstances.length}):\n${instanceList}\n\n` +
+                            `Click "Open in First Instance" to open in the first instance, or "Cancel" to abort.`,
                             { modal: true },
                             'Open in First Instance',
                             'Cancel'

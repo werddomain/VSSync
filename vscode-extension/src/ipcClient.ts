@@ -146,6 +146,20 @@ export class IpcClient {
      * Probe a specific port for a Visual Studio instance
      */
     private probePort(port: number, workspacePath: string): Promise<IdeInstance | null> {
+        return this.probePortInternal(port, workspacePath, true);
+    }
+
+    /**
+     * Probe a specific port for any Visual Studio instance (regardless of workspace)
+     */
+    private probePortAllInstances(port: number): Promise<IdeInstance | null> {
+        return this.probePortInternal(port, '', false);
+    }
+
+    /**
+     * Internal probe method that handles both workspace-matched and all-instance discovery
+     */
+    private probePortInternal(port: number, workspacePath: string, matchWorkspace: boolean): Promise<IdeInstance | null> {
         return new Promise((resolve) => {
             const socket = new net.Socket();
             let responseReceived = false;
@@ -183,86 +197,11 @@ export class IpcClient {
                         
                         const payload = msg.payload;
                         
-                        // Only return if it's a Visual Studio instance with matching workspace
-                        if (payload.ide === 'visualstudio' && 
-                            this.pathsMatch(payload.workspacePath, workspacePath)) {
-                            socket.destroy();
-                            resolve({
-                                port: payload.port,
-                                ide: payload.ide,
-                                version: payload.version,
-                                workspacePath: payload.workspacePath,
-                                solutionPath: payload.solutionPath,
-                                pid: payload.pid,
-                                windowHandle: payload.windowHandle
-                            });
-                            return;
-                        }
-                        socket.destroy();
-                        resolve(null);
-                    }
-                }
-                buffer = lines[lines.length - 1];
-            });
-
-            socket.on('error', () => {
-                clearTimeout(timeoutId);
-                socket.destroy();
-                resolve(null);
-            });
-
-            socket.on('close', () => {
-                clearTimeout(timeoutId);
-                if (!responseReceived) {
-                    resolve(null);
-                }
-            });
-        });
-    }
-
-    /**
-     * Probe a specific port for any Visual Studio instance (regardless of workspace)
-     */
-    private probePortAllInstances(port: number): Promise<IdeInstance | null> {
-        return new Promise((resolve) => {
-            const socket = new net.Socket();
-            let responseReceived = false;
-
-            const timeoutId = setTimeout(() => {
-                socket.destroy();
-                resolve(null);
-            }, CONNECTION_TIMEOUT);
-
-            socket.connect(port, '127.0.0.1', () => {
-                const payload: Record<string, unknown> = {
-                    workspacePath: ''
-                };
-                const message = createMessage('DISCOVER', payload, 'vscode');
-
-                socket.write(JSON.stringify(message) + '\n');
-            });
-
-            let buffer = '';
-            socket.on('data', (data) => {
-                buffer += data.toString();
-                const lines = buffer.split('\n');
-                
-                for (let i = 0; i < lines.length - 1; i++) {
-                    const msg = parseMessage(lines[i]);
-                    if (msg && msg.type === 'DISCOVER_RESPONSE') {
-                        responseReceived = true;
-                        clearTimeout(timeoutId);
+                        // Check if we should return this instance
+                        const isVisualStudio = payload.ide === 'visualstudio';
+                        const workspaceMatches = !matchWorkspace || this.pathsMatch(payload.workspacePath, workspacePath);
                         
-                        if (!isDiscoverResponsePayload(msg.payload)) {
-                            socket.destroy();
-                            resolve(null);
-                            return;
-                        }
-                        
-                        const payload = msg.payload;
-                        
-                        // Return any Visual Studio instance
-                        if (payload.ide === 'visualstudio') {
+                        if (isVisualStudio && workspaceMatches) {
                             socket.destroy();
                             resolve({
                                 port: payload.port,
