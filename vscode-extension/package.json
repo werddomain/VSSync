@@ -27,6 +27,14 @@
         "title": "Open in Visual Studio"
       }
     ],
+    "keybindings": [
+      {
+        "command": "vssync.openInVisualStudio",
+        "key": "ctrl+shift+v s",
+        "mac": "cmd+shift+v s",
+        "when": "editorTextFocus"
+      }
+    ],
     "menus": {
       "editor/title/context": [
         {
