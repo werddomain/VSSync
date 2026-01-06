@@ -1,5 +1,5 @@
 /**
- * VSSync IPC Server
+ * VS²Sync IPC Server
  * TCP server that listens for requests from Visual Studio
  */
 
@@ -59,7 +59,7 @@ export class IpcServer {
 
         this.server!.listen(port, '127.0.0.1', () => {
             this.port = port;
-            console.log(`VSSync IPC server listening on port ${port}`);
+            console.log(`VS²Sync IPC server listening on port ${port}`);
             resolve(port);
         });
     }
@@ -84,7 +84,7 @@ export class IpcServer {
         });
 
         socket.on('error', (err) => {
-            console.error('VSSync IPC connection error:', err.message);
+            console.error('VS²Sync IPC connection error:', err.message);
         });
     }
 

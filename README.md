@@ -1,4 +1,4 @@
-# VSSync - Open in Other IDE
+# VS²Sync - Open in Other IDE
 
 A suite of synchronized extensions for **Visual Studio Code** and **Visual Studio** that allows you to open the current file in the other IDE with a single click.
 
@@ -16,7 +16,7 @@ A suite of synchronized extensions for **Visual Studio Code** and **Visual Studi
 
 1. Open VS Code
 2. Go to Extensions (Ctrl+Shift+X)
-3. Search for "VSSync"
+3. Search for "VS²Sync" or "VS-2-Sync"
 4. Click Install
 
 **Or install from VSIX:**
@@ -31,7 +31,7 @@ npm run compile
 
 1. Open Visual Studio
 2. Go to Extensions > Manage Extensions
-3. Search for "VSSync"
+3. Search for "VS²Sync" or "VS-2-Sync"
 4. Click Download
 
 **Or build from source:**
@@ -121,7 +121,7 @@ This can happen due to Windows focus stealing prevention. Try:
 ### Project Structure
 
 ```
-VSSync/
+VS²Sync/
 ├── vscode-extension/          # VS Code extension (TypeScript)
 │   ├── src/
 │   │   ├── extension.ts       # Main extension entry

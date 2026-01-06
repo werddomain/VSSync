@@ -116,7 +116,7 @@ namespace VSSync
                     VsShellUtilities.ShowMessageBox(
                         _package,
                         "No active document to open.",
-                        "VSSync",
+                        "VS²Sync",
                         OLEMSGICON.OLEMSGICON_INFO,
                         OLEMSGBUTTON.OLEMSGBUTTON_OK,
                         OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
@@ -138,7 +138,7 @@ namespace VSSync
                     VsShellUtilities.ShowMessageBox(
                         _package,
                         "No solution or folder is open.",
-                        "VSSync",
+                        "VS²Sync",
                         OLEMSGICON.OLEMSGICON_INFO,
                         OLEMSGBUTTON.OLEMSGBUTTON_OK,
                         OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
@@ -146,7 +146,7 @@ namespace VSSync
                 }
 
                 // Show status
-                dte.StatusBar.Text = "VSSync: Searching for VS Code instances...";
+                dte.StatusBar.Text = "VS²Sync: Searching for VS Code instances...";
                 dte.StatusBar.Animate(true, vsStatusAnimation.vsStatusAnimationFind);
 
                 try
@@ -156,14 +156,14 @@ namespace VSSync
 
                     if (instances.Count == 0)
                     {
-                        dte.StatusBar.Text = "VSSync: No VS Code instance found";
+                        dte.StatusBar.Text = "VS²Sync: No VS Code instance found";
                         dte.StatusBar.Animate(false, vsStatusAnimation.vsStatusAnimationFind);
 
                         VsShellUtilities.ShowMessageBox(
                             _package,
                             "No VS Code instance found with the same workspace open.\n\n" +
-                            "Make sure VS Code has the VSSync extension installed and the same folder open.",
-                            "VSSync",
+                            "Make sure VS Code has the VS²Sync extension installed and the same folder open.",
+                            "VS²Sync",
                             OLEMSGICON.OLEMSGICON_WARNING,
                             OLEMSGBUTTON.OLEMSGBUTTON_OK,
                             OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
@@ -204,12 +204,12 @@ namespace VSSync
 
                     if (selectedInstance == null)
                     {
-                        dte.StatusBar.Text = "VSSync: Operation cancelled";
+                        dte.StatusBar.Text = "VS²Sync: Operation cancelled";
                         dte.StatusBar.Animate(false, vsStatusAnimation.vsStatusAnimationFind);
                         return;
                     }
 
-                    dte.StatusBar.Text = "VSSync: Opening file in VS Code...";
+                    dte.StatusBar.Text = "VS²Sync: Opening file in VS Code...";
 
                     // Open the file
                     var success = await _ipcClient.OpenFileAsync(selectedInstance, filePath, line, column);
@@ -218,15 +218,15 @@ namespace VSSync
 
                     if (success)
                     {
-                        dte.StatusBar.Text = "VSSync: File opened in VS Code";
+                        dte.StatusBar.Text = "VS²Sync: File opened in VS Code";
                     }
                     else
                     {
-                        dte.StatusBar.Text = "VSSync: Failed to open file";
+                        dte.StatusBar.Text = "VS²Sync: Failed to open file";
                         VsShellUtilities.ShowMessageBox(
                             _package,
                             "Failed to open file in VS Code.",
-                            "VSSync",
+                            "VS²Sync",
                             OLEMSGICON.OLEMSGICON_WARNING,
                             OLEMSGBUTTON.OLEMSGBUTTON_OK,
                             OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
@@ -242,7 +242,7 @@ namespace VSSync
                 VsShellUtilities.ShowMessageBox(
                     _package,
                     $"An error occurred: {ex.Message}",
-                    "VSSync Error",
+                    "VS²Sync Error",
                     OLEMSGICON.OLEMSGICON_CRITICAL,
                     OLEMSGBUTTON.OLEMSGBUTTON_OK,
                     OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
@@ -267,7 +267,7 @@ namespace VSSync
             VsShellUtilities.ShowMessageBox(
                 _package,
                 message,
-                "VSSync - Multiple Instances Found",
+                "VS²Sync - Multiple Instances Found",
                 OLEMSGICON.OLEMSGICON_INFO,
                 OLEMSGBUTTON.OLEMSGBUTTON_OK,
                 OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
