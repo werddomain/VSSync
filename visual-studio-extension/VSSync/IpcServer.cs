@@ -163,7 +163,7 @@ namespace VSSync
                 ? Path.GetDirectoryName(solutionPath) ?? string.Empty
                 : GetOpenFolderPath(dte);
 
-            var windowHandle = dte != null ? new IntPtr(dte.MainWindow.HWnd) : IntPtr.Zero;
+            var windowHandle = dte != null ? dte.MainWindow.HWnd : IntPtr.Zero;
 
             var response = new DiscoverResponsePayload
             {
@@ -266,7 +266,7 @@ namespace VSSync
 
             try
             {
-                var hwnd = new IntPtr(dte.MainWindow.HWnd);
+                var hwnd = dte.MainWindow.HWnd;
                 WindowHelper.FocusWindow(hwnd);
             }
             catch (Exception ex)

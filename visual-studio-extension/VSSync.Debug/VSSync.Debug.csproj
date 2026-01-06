@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>VSSync.Debug</RootNamespace>
+    <AssemblyName>VSSync.Debug</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    
+    <!-- This makes F5 launch the VS Experimental Instance -->
+    <StartAction>Program</StartAction>
+    <StartProgram>$(DevEnvDir)devenv.exe</StartProgram>
+    <StartArguments>/rootsuffix Exp</StartArguments>
+    
+    <!-- Don't generate a real executable - this is just for debugging -->
+    <GenerateProgramFile>false</GenerateProgramFile>
+  </PropertyGroup>
+
+  <!-- Reference the main extension project to ensure it builds first -->
+  <ItemGroup>
+    <ProjectReference Include="..\VSSync\VSSync.csproj">
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <!-- VS SDK for devenv path resolution -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.8.37" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+</Project>

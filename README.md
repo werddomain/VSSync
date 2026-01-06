@@ -158,6 +158,35 @@ cd visual-studio-extension/VSSync
 dotnet build
 ```
 
+### Debugging
+
+**VS Code Extension:**
+1. Open the `vscode-extension` folder in VS Code
+2. Run `npm install` if you haven't already
+3. Press **F5** or go to **Run > Start Debugging**
+4. Select "Run Extension" from the launch configuration dropdown
+5. A new VS Code window will open with `[Extension Development Host]` in the title bar
+6. Your extension is loaded in this window - test it there
+7. Set breakpoints in your TypeScript source files to debug
+
+Available launch configurations:
+- **Run Extension**: Compiles and launches the Extension Development Host
+- **Run Extension (Watch Mode)**: Same as above with continuous compilation
+- **Extension Tests**: Runs extension tests in a test host
+
+**Visual Studio Extension:**
+1. Open `VSSync.sln` in Visual Studio 2022
+2. Right-click on `VSSync.Debug` in Solution Explorer and select **Set as Startup Project**
+3. Press **F5** to start debugging
+4. The solution will build the extension and launch Visual Studio's Experimental Instance
+5. The experimental instance has `[Experimental Instance]` in the title bar - your extension is loaded there
+6. Set breakpoints in the `VSSync` project source files to debug
+
+The `VSSync.Debug` project is a launcher that:
+- References the main `VSSync` extension project (ensures it builds first)
+- Launches `devenv.exe /rootsuffix Exp` (the Experimental Instance)
+- Keeps your main Visual Studio installation unaffected
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
