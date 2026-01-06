@@ -110,13 +110,13 @@ jobs:
           Set-Content $manifestPath $content
           Write-Host "Updated vsixmanifest version to $version"
 
-      - name: Restore NuGet packages
+      - name: Restore packages
         working-directory: visual-studio-extension/VSSync
-        run: nuget restore VSSync.csproj -PackagesDirectory packages
+        run: dotnet restore VSSync.csproj
 
       - name: Build Visual Studio Extension
         working-directory: visual-studio-extension/VSSync
-        run: msbuild VSSync.csproj /p:Configuration=Release /p:DeployExtension=false
+        run: msbuild VSSync.csproj /p:Configuration=Release /p:DeployExtension=false /p:CreateVsixContainer=true
 
       - name: Find and rename VSIX
         working-directory: visual-studio-extension/VSSync
