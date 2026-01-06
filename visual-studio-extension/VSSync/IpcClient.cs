@@ -47,6 +47,31 @@ namespace VSSync
         }
 
         /// <summary>
+        /// Discover all VS Code instances regardless of workspace
+        /// </summary>
+        public async Task<List<IdeInstance>> DiscoverAllInstancesAsync()
+        {
+            var instances = new List<IdeInstance>();
+            var tasks = new List<Task<IdeInstance?>>();
+
+            for (int port = BasePort; port < BasePort + PortRange; port++)
+            {
+                tasks.Add(ProbePortAllAsync(port));
+            }
+
+            var results = await Task.WhenAll(tasks);
+            foreach (var result in results)
+            {
+                if (result != null)
+                {
+                    instances.Add(result);
+                }
+            }
+
+            return instances;
+        }
+
+        /// <summary>
         /// Send open file request to a VS Code instance
         /// </summary>
         public async Task<bool> OpenFileAsync(IdeInstance instance, string filePath, int? line = null, int? column = null)
@@ -105,6 +130,16 @@ namespace VSSync
 
         private async Task<IdeInstance?> ProbePortAsync(int port, string workspacePath)
         {
+            return await ProbePortInternalAsync(port, workspacePath, matchWorkspace: true);
+        }
+
+        private async Task<IdeInstance?> ProbePortAllAsync(int port)
+        {
+            return await ProbePortInternalAsync(port, string.Empty, matchWorkspace: false);
+        }
+
+        private async Task<IdeInstance?> ProbePortInternalAsync(int port, string workspacePath, bool matchWorkspace)
+        {
             try
             {
                 using (var client = new TcpClient())
@@ -148,7 +183,16 @@ namespace VSSync
                             if (responseMsg?.Type == "DISCOVER_RESPONSE")
                             {
                                 var payload = ((JObject)responseMsg.Payload).ToObject<DiscoverResponsePayload>();
-                                if (payload != null && payload.Ide == "vscode" && PathsMatch(payload.WorkspacePath, workspacePath))
+                                if (payload == null)
+                                {
+                                    return null;
+                                }
+                                
+                                // Check if we should return this instance
+                                bool isVsCode = payload.Ide == "vscode";
+                                bool workspaceMatches = !matchWorkspace || PathsMatch(payload.WorkspacePath ?? "", workspacePath);
+                                
+                                if (isVsCode && workspaceMatches)
                                 {
                                     return new IdeInstance
                                     {

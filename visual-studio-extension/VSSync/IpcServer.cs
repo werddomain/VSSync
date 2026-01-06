@@ -267,6 +267,12 @@ namespace VSSync
             try
             {
                 var hwnd = dte.MainWindow.HWnd;
+                // Validate window handle before attempting to focus to prevent E_INVALIDARG error
+                if (hwnd == IntPtr.Zero)
+                {
+                    Debug.WriteLine("VS²Sync: Cannot focus window - invalid window handle");
+                    return;
+                }
                 WindowHelper.FocusWindow(hwnd);
             }
             catch (Exception ex)

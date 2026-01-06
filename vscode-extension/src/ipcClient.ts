@@ -51,6 +51,28 @@ export class IpcClient {
     }
 
     /**
+     * Discover all active Visual Studio instances regardless of workspace
+     */
+    async discoverAllInstances(): Promise<IdeInstance[]> {
+        const instances: IdeInstance[] = [];
+        const promises: Promise<IdeInstance | null>[] = [];
+
+        for (let port = this.basePort; port < this.basePort + PORT_RANGE; port++) {
+            promises.push(this.probePortAllInstances(port));
+        }
+
+        const results = await Promise.allSettled(promises);
+        
+        for (const result of results) {
+            if (result.status === 'fulfilled' && result.value) {
+                instances.push(result.value);
+            }
+        }
+
+        return instances;
+    }
+
+    /**
      * Send an open file request to a specific IDE instance
      */
     async openFile(
@@ -124,6 +146,20 @@ export class IpcClient {
      * Probe a specific port for a Visual Studio instance
      */
     private probePort(port: number, workspacePath: string): Promise<IdeInstance | null> {
+        return this.probePortInternal(port, workspacePath, true);
+    }
+
+    /**
+     * Probe a specific port for any Visual Studio instance (regardless of workspace)
+     */
+    private probePortAllInstances(port: number): Promise<IdeInstance | null> {
+        return this.probePortInternal(port, '', false);
+    }
+
+    /**
+     * Internal probe method that handles both workspace-matched and all-instance discovery
+     */
+    private probePortInternal(port: number, workspacePath: string, matchWorkspace: boolean): Promise<IdeInstance | null> {
         return new Promise((resolve) => {
             const socket = new net.Socket();
             let responseReceived = false;
@@ -161,9 +197,11 @@ export class IpcClient {
                         
                         const payload = msg.payload;
                         
-                        // Only return if it's a Visual Studio instance with matching workspace
-                        if (payload.ide === 'visualstudio' && 
-                            this.pathsMatch(payload.workspacePath, workspacePath)) {
+                        // Check if we should return this instance
+                        const isVisualStudio = payload.ide === 'visualstudio';
+                        const workspaceMatches = !matchWorkspace || this.pathsMatch(payload.workspacePath, workspacePath);
+                        
+                        if (isVisualStudio && workspaceMatches) {
                             socket.destroy();
                             resolve({
                                 port: payload.port,
