@@ -149,28 +149,27 @@ jobs:
         env:
           VS_MARKETPLACE_PAT: ${{ secrets.VS_MARKETPLACE_PAT }}
         run: |
-          # Check known Visual Studio installation paths for VsixPublisher
-          $vsEditions = @("Enterprise", "Professional", "Community", "BuildTools")
-          $vsVersions = @("2022", "2019")
-          $vsixPublisher = $null
+          # Build list of possible VsixPublisher paths
+          $paths = @(
+            "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
+            "${env:ProgramFiles}\Microsoft Visual Studio\2022\Professional\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
+            "${env:ProgramFiles}\Microsoft Visual Studio\2022\Community\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
+            "${env:ProgramFiles}\Microsoft Visual Studio\2022\BuildTools\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
+            "${env:ProgramFiles}\Microsoft Visual Studio\2019\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
+            "${env:ProgramFiles}\Microsoft Visual Studio\2019\Professional\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe",
+            "${env:ProgramFiles}\Microsoft Visual Studio\2019\Community\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
+          )
           
-          foreach ($version in $vsVersions) {
-            foreach ($edition in $vsEditions) {
-              $path = "${env:ProgramFiles}\Microsoft Visual Studio\$version\$edition\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
-              if (Test-Path $path) {
-                $vsixPublisher = $path
-                Write-Host "Found VsixPublisher at: $path"
-                break
-              }
-            }
-            if ($vsixPublisher) { break }
-          }
+          $vsixPublisher = $paths | Where-Object { Test-Path $_ } | Select-Object -First 1
           
-          if ($vsixPublisher -and (Test-Path $vsixPublisher)) {
+          if ($vsixPublisher) {
+            Write-Host "Found VsixPublisher at: $vsixPublisher"
             $vsix = Get-ChildItem -Path "bin/Release" -Filter "*.vsix" | Select-Object -First 1
             & $vsixPublisher publish -payload $vsix.FullName -publishManifest publish-manifest.json -personalAccessToken $env:VS_MARKETPLACE_PAT
           } else {
-            Write-Host "::warning::VsixPublisher not found in common Visual Studio paths. Please publish manually or ensure VS SDK is installed."
+            Write-Host "::warning::VsixPublisher not found. To enable automated publishing:"
+            Write-Host "::warning::1. Install Visual Studio with the 'Visual Studio extension development' workload"
+            Write-Host "::warning::2. Or publish manually via https://marketplace.visualstudio.com/manage/publishers"
           }
 
   # Create GitHub Release
