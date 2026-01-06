@@ -38,7 +38,7 @@ namespace VSSync
         /// <summary>
         /// Start the IPC server
         /// </summary>
-        public async Task StartAsync()
+        public Task StartAsync()
         {
             _cts = new CancellationTokenSource();
 
@@ -62,11 +62,12 @@ namespace VSSync
             if (_listener == null)
             {
                 Debug.WriteLine("VS²Sync: Failed to start IPC server - no available port");
-                return;
+                return Task.CompletedTask;
             }
 
             // Start accepting connections in background
             _ = AcceptConnectionsAsync(_cts.Token);
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -158,18 +159,27 @@ namespace VSSync
             await _package.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             var dte = await _package.GetServiceAsync(typeof(DTE)) as DTE2;
-            var solutionPath = dte?.Solution?.FullName ?? string.Empty;
-            var workspacePath = !string.IsNullOrEmpty(solutionPath)
-                ? Path.GetDirectoryName(solutionPath) ?? string.Empty
-                : GetOpenFolderPath(dte);
-
-            var windowHandle = dte != null ? dte.MainWindow.HWnd : IntPtr.Zero;
+            
+            string solutionPath = string.Empty;
+            string workspacePath = string.Empty;
+            IntPtr windowHandle = IntPtr.Zero;
+            string version = "unknown";
+            
+            if (dte != null)
+            {
+                solutionPath = dte.Solution?.FullName ?? string.Empty;
+                workspacePath = !string.IsNullOrEmpty(solutionPath)
+                    ? Path.GetDirectoryName(solutionPath) ?? string.Empty
+                    : GetOpenFolderPath(dte);
+                windowHandle = dte.MainWindow.HWnd;
+                version = dte.Version ?? "unknown";
+            }
 
             var response = new DiscoverResponsePayload
             {
                 Port = _port,
                 Ide = "visualstudio",
-                Version = dte?.Version ?? "unknown",
+                Version = version,
                 WorkspacePath = workspacePath,
                 SolutionPath = solutionPath,
                 Pid = System.Diagnostics.Process.GetCurrentProcess().Id,
@@ -236,7 +246,7 @@ namespace VSSync
 
                         try
                         {
-                            var selection = dte.ActiveDocument.Selection as TextSelection;
+                            var selection = dte.ActiveDocument?.Selection as TextSelection;
                             selection?.MoveToLineAndOffset(line, column);
                         }
                         catch { }
