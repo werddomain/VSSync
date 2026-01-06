@@ -58,6 +58,7 @@ npm run compile
 1. Open a file in your solution
 2. **Right-click** on the document tab and select "Open in VS Code"
 3. **OR use the keyboard shortcut**: Press `Ctrl+Shift+V`, then press `S`
+   - Note: Visual Studio runs on Windows only
 
 ## Requirements
 
