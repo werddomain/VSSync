@@ -1,0 +1,193 @@
+name: Release Extensions
+
+on:
+  push:
+    tags:
+      # Match version tags like v1.0.0, v2.1.3, etc.
+      # Exclude tags ending with 'b' (beta versions)
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  # Extract version from tag
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG=${GITHUB_REF#refs/tags/}
+          VERSION=${TAG#v}
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Tag: $TAG, Version: $VERSION"
+
+  # Build and publish VS Code Extension
+  vscode-extension:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: vscode-extension/package-lock.json
+
+      - name: Install dependencies
+        working-directory: vscode-extension
+        run: npm ci
+
+      - name: Update version in package.json
+        working-directory: vscode-extension
+        run: |
+          npm version ${{ needs.prepare.outputs.version }} --no-git-tag-version --allow-same-version
+
+      - name: Lint
+        working-directory: vscode-extension
+        run: npm run lint
+
+      - name: Compile
+        working-directory: vscode-extension
+        run: npm run compile
+
+      - name: Install vsce
+        run: npm install -g @vscode/vsce
+
+      - name: Package VS Code Extension
+        working-directory: vscode-extension
+        run: vsce package --out vssync-${{ needs.prepare.outputs.version }}.vsix
+
+      - name: Upload VS Code Extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vscode-extension-vsix
+          path: vscode-extension/vssync-${{ needs.prepare.outputs.version }}.vsix
+
+      - name: Publish to VS Code Marketplace
+        if: ${{ vars.PUBLISH_VSCODE_MARKETPLACE == 'true' }}
+        working-directory: vscode-extension
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: vsce publish -p $VSCE_PAT
+
+  # Build and publish Visual Studio Extension
+  visual-studio-extension:
+    needs: prepare
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Update version in vsixmanifest
+        working-directory: visual-studio-extension/VSSync
+        shell: pwsh
+        run: |
+          $version = "${{ needs.prepare.outputs.version }}"
+          $manifestPath = "source.extension.vsixmanifest"
+          $content = Get-Content $manifestPath -Raw
+          $content = $content -replace 'Version="[0-9]+\.[0-9]+\.[0-9]+"', "Version=`"$version`""
+          Set-Content $manifestPath $content
+          Write-Host "Updated vsixmanifest version to $version"
+
+      - name: Restore NuGet packages
+        working-directory: visual-studio-extension/VSSync
+        run: nuget restore VSSync.csproj -PackagesDirectory packages
+
+      - name: Build Visual Studio Extension
+        working-directory: visual-studio-extension/VSSync
+        run: msbuild VSSync.csproj /p:Configuration=Release /p:DeployExtension=false
+
+      - name: Find and rename VSIX
+        working-directory: visual-studio-extension/VSSync
+        shell: pwsh
+        run: |
+          $vsix = Get-ChildItem -Path "bin/Release" -Filter "*.vsix" | Select-Object -First 1
+          if ($vsix) {
+            $newName = "VSSync-VisualStudio-${{ needs.prepare.outputs.version }}.vsix"
+            Move-Item $vsix.FullName "bin/Release/$newName"
+            Write-Host "Renamed to $newName"
+          } else {
+            Write-Host "No VSIX found in bin/Release"
+            Get-ChildItem -Path "bin/Release" -Recurse
+          }
+
+      - name: Upload Visual Studio Extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vs-extension-vsix
+          path: visual-studio-extension/VSSync/bin/Release/*.vsix
+
+      - name: Publish to Visual Studio Marketplace
+        if: ${{ vars.PUBLISH_VS_MARKETPLACE == 'true' }}
+        working-directory: visual-studio-extension/VSSync
+        shell: pwsh
+        env:
+          VS_MARKETPLACE_PAT: ${{ secrets.VS_MARKETPLACE_PAT }}
+        run: |
+          # Install VsixPublisher if not available
+          $vsixPublisher = "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe"
+          if (-not (Test-Path $vsixPublisher)) {
+            Write-Host "VsixPublisher not found at expected path. Attempting alternative..."
+            $vsixPublisher = (Get-ChildItem -Path "${env:ProgramFiles}" -Recurse -Filter "VsixPublisher.exe" -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+          }
+          
+          if ($vsixPublisher -and (Test-Path $vsixPublisher)) {
+            $vsix = Get-ChildItem -Path "bin/Release" -Filter "*.vsix" | Select-Object -First 1
+            & $vsixPublisher publish -payload $vsix.FullName -publishManifest publish-manifest.json -personalAccessToken $env:VS_MARKETPLACE_PAT
+          } else {
+            Write-Host "::warning::VsixPublisher not found. Please publish manually or configure the workflow with proper VS SDK installation."
+          }
+
+  # Create GitHub Release
+  create-release:
+    needs: [prepare, vscode-extension, visual-studio-extension]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download VS Code Extension artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vscode-extension-vsix
+          path: artifacts/vscode
+
+      - name: Download Visual Studio Extension artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: vs-extension-vsix
+          path: artifacts/vs
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.prepare.outputs.tag }}
+          name: Release ${{ needs.prepare.outputs.tag }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            artifacts/vscode/*.vsix
+            artifacts/vs/*.vsix
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
