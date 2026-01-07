@@ -74,7 +74,7 @@ public class IpcClient
             using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
 
             var normalizedPath = NormalizePath(filePath);
-            var message = IpcMessage.Create(MessageType.OPEN_FILE, new OpenFilePayload
+            var message = IpcMessage<OpenFilePayload>.Create(MessageType.OPEN_FILE, new OpenFilePayload
             {
                 FilePath = normalizedPath,
                 Line = line,
@@ -97,15 +97,15 @@ public class IpcClient
 
             if (response != null)
             {
-                var responseMsg = JsonConvert.DeserializeObject<IpcMessage>(response);
+                var responseMsg = JsonConvert.DeserializeObject<IpcMessage<OpenFileResponsePayload>>(response);
                 if (responseMsg?.Type == "OPEN_FILE_RESPONSE")
                 {
-                    var payload = ((JObject)responseMsg.Payload).ToObject<OpenFileResponsePayload>();
-                    if (payload?.Success == true)
+                    
+                    if (responseMsg.Payload?.Success == true)
                     {
                         return (true, null);
                     }
-                    return (false, payload?.Error ?? "Unknown error");
+                    return (false, responseMsg.Payload?.Error ?? "Unknown error");
                 }
             }
 
@@ -142,7 +142,7 @@ public class IpcClient
             using var reader = new StreamReader(stream, Encoding.UTF8);
             using var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true };
 
-            var message = IpcMessage.Create(MessageType.DISCOVER, new DiscoverPayload
+            var message = IpcMessage<DiscoverPayload>.Create(MessageType.DISCOVER, new DiscoverPayload
             {
                 WorkspacePath = string.Empty
             }, "debughelper");
@@ -158,10 +158,10 @@ public class IpcClient
             var response = await readTask;
             if (response != null)
             {
-                var responseMsg = JsonConvert.DeserializeObject<IpcMessage>(response);
+                var responseMsg = JsonConvert.DeserializeObject<IpcMessage<DiscoverResponsePayload>>(response);
                 if (responseMsg?.Type == "DISCOVER_RESPONSE")
                 {
-                    var payload = ((JObject)responseMsg.Payload).ToObject<DiscoverResponsePayload>();
+                    var payload = responseMsg.Payload;
                     if (payload != null)
                     {
                         Log($"Port {port}: {payload.Ide} (v{payload.Version}) PID:{payload.Pid} Workspace:{payload.WorkspacePath}");

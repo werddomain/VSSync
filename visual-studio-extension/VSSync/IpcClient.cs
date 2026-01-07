@@ -91,7 +91,7 @@ namespace VSSync
                     using (var reader = new StreamReader(stream, Encoding.UTF8))
                     using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
                     {
-                        var message = IpcMessage.Create(MessageType.OPEN_FILE, new OpenFilePayload
+                        var message = IpcMessage<OpenFilePayload>.Create(MessageType.OPEN_FILE, new OpenFilePayload
                         {
                             FilePath = NormalizePath(filePath),
                             Line = line,
@@ -110,10 +110,10 @@ namespace VSSync
                         var response = await readTask;
                         if (response != null)
                         {
-                            var responseMsg = JsonConvert.DeserializeObject<IpcMessage>(response);
+                            var responseMsg = JsonConvert.DeserializeObject<IpcMessage<OpenFileResponsePayload>>(response);
                             if (responseMsg?.Type == "OPEN_FILE_RESPONSE")
                             {
-                                var payload = ((JObject)responseMsg.Payload).ToObject<OpenFileResponsePayload>();
+                                var payload = responseMsg.Payload;
                                 return payload?.Success ?? false;
                             }
                         }
@@ -163,7 +163,7 @@ namespace VSSync
                     using (var reader = new StreamReader(stream, Encoding.UTF8))
                     using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
                     {
-                        var message = IpcMessage.Create(MessageType.DISCOVER, new DiscoverPayload
+                        var message = IpcMessage<DiscoverPayload>.Create(MessageType.DISCOVER, new DiscoverPayload
                         {
                             WorkspacePath = workspacePath
                         }, IdeType.visualstudio);
@@ -179,10 +179,10 @@ namespace VSSync
                         var response = await readTask;
                         if (response != null)
                         {
-                            var responseMsg = JsonConvert.DeserializeObject<IpcMessage>(response);
+                            var responseMsg = JsonConvert.DeserializeObject<IpcMessage<DiscoverResponsePayload>>(response);
                             if (responseMsg?.Type == "DISCOVER_RESPONSE")
                             {
-                                var payload = ((JObject)responseMsg.Payload).ToObject<DiscoverResponsePayload>();
+                                var payload = responseMsg.Payload;
                                 if (payload == null)
                                 {
                                     return null;

@@ -73,7 +73,9 @@ export function createMessage(
 
 export function parseMessage(data: string): IpcMessage | null {
     try {
-        const parsed = JSON.parse(data);
+        // Remove BOM (Byte Order Mark) and trim whitespace/control characters
+        const cleanedData = data.replace(/^\uFEFF/, '').trim();
+        const parsed = JSON.parse(cleanedData);
         if (parsed && typeof parsed.type === 'string' && parsed.payload) {
             return parsed as IpcMessage;
         }

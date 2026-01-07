@@ -27,13 +27,13 @@ public enum IdeType
 /// <summary>
 /// Base IPC Message structure
 /// </summary>
-public class IpcMessage
+public class IpcMessage<T>
 {
     [JsonProperty("type")]
     public string Type { get; set; } = string.Empty;
 
     [JsonProperty("payload")]
-    public object Payload { get; set; } = new { };
+    public T? Payload { get; set; }
 
     [JsonProperty("timestamp")]
     public long Timestamp { get; set; }
@@ -44,9 +44,9 @@ public class IpcMessage
     [JsonProperty("sourcePid")]
     public int SourcePid { get; set; }
 
-    public static IpcMessage Create(MessageType type, object payload, string sourceIde)
+    public static IpcMessage<T> Create<T>(MessageType type, T payload, string sourceIde)
     {
-        return new IpcMessage
+        return new IpcMessage<T>
         {
             Type = type.ToString(),
             Payload = payload,

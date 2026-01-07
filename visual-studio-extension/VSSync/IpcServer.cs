@@ -114,15 +114,33 @@ namespace VSSync
                         var line = await reader.ReadLineAsync();
                         if (line == null) break;
 
+                        Debug.WriteLine("Received: " + Environment.NewLine + line);
                         try
                         {
-                            var message = JsonConvert.DeserializeObject<IpcMessage>(line);
+                            var message = JsonConvert.DeserializeObject<IpcMessage<object>>(line);
                             if (message != null)
                             {
-                                var response = await HandleMessageAsync(message);
+                                IpcMessage<object> response = null;
+                                switch (message.Type)
+                                {
+                                    case "DISCOVER":
+                                        response =  await HandleDiscoverAsync(message);
+                                        break;
+                                    case "OPEN_FILE":
+                                        response =  await HandleOpenFileAsync(JsonConvert.DeserializeObject<IpcMessage<OpenFilePayload>>(line));
+                                        break;
+                                    case "PING":
+                                        response =  IpcMessage<object>.Create<object>(MessageType.PONG, new { }, IdeType.visualstudio);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                                
                                 if (response != null)
                                 {
-                                    await writer.WriteLineAsync(JsonConvert.SerializeObject(response));
+                                    var responseContent = JsonConvert.SerializeObject(response);
+                                    await writer.WriteLineAsync(responseContent);
+                                    Debug.WriteLine("Response: " + Environment.NewLine + responseContent);
                                 }
                             }
                         }
@@ -139,22 +157,9 @@ namespace VSSync
             }
         }
 
-        private async Task<IpcMessage?> HandleMessageAsync(IpcMessage message)
-        {
-            switch (message.Type)
-            {
-                case "DISCOVER":
-                    return await HandleDiscoverAsync(message);
-                case "OPEN_FILE":
-                    return await HandleOpenFileAsync(message);
-                case "PING":
-                    return IpcMessage.Create(MessageType.PONG, new { }, IdeType.visualstudio);
-                default:
-                    return null;
-            }
-        }
+        
 
-        private async Task<IpcMessage> HandleDiscoverAsync(IpcMessage message)
+        private async Task<IpcMessage<object>> HandleDiscoverAsync(IpcMessage<object> message)
         {
             await _package.JoinableTaskFactory.SwitchToMainThreadAsync();
 
@@ -186,7 +191,7 @@ namespace VSSync
                 WindowHandle = windowHandle.ToInt64()
             };
 
-            return IpcMessage.Create(MessageType.DISCOVER_RESPONSE, response, IdeType.visualstudio);
+            return IpcMessage<object>.Create<object>(MessageType.DISCOVER_RESPONSE, response, IdeType.visualstudio);
         }
 
         private string GetOpenFolderPath(DTE2? dte)
@@ -213,11 +218,11 @@ namespace VSSync
             return string.Empty;
         }
 
-        private async Task<IpcMessage> HandleOpenFileAsync(IpcMessage message)
+        private async Task<IpcMessage<Object>> HandleOpenFileAsync(IpcMessage<OpenFilePayload> message)
         {
             try
             {
-                var payload = ((JObject)message.Payload).ToObject<OpenFilePayload>();
+                var payload = message.Payload;
                 if (payload == null)
                 {
                     return CreateErrorResponse("Invalid payload");
@@ -259,7 +264,7 @@ namespace VSSync
                     await FocusWindowAsync(dte);
                 }
 
-                return IpcMessage.Create(MessageType.OPEN_FILE_RESPONSE, new OpenFileResponsePayload
+                return IpcMessage<object>.Create<object>(MessageType.OPEN_FILE_RESPONSE, new OpenFileResponsePayload
                 {
                     Success = true
                 }, IdeType.visualstudio);
@@ -291,9 +296,9 @@ namespace VSSync
             }
         }
 
-        private static IpcMessage CreateErrorResponse(string error)
+        private static IpcMessage<object> CreateErrorResponse(string error)
         {
-            return IpcMessage.Create(MessageType.OPEN_FILE_RESPONSE, new OpenFileResponsePayload
+            return IpcMessage<object>.Create<object>(MessageType.OPEN_FILE_RESPONSE, new OpenFileResponsePayload
             {
                 Success = false,
                 Error = error
