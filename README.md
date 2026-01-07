@@ -24,7 +24,7 @@ A suite of synchronized extensions for **Visual Studio Code** and **Visual Studi
 
 1. Open VS Code
 2. Go to Extensions (Ctrl+Shift+X)
-3. Search for "VS²Sync" or "VS-2-Sync"
+3. Search for "VS²Sync" or "VS2Sync"
 4. Click Install
 
 **Or install from VSIX:**
