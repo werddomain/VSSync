@@ -18,7 +18,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     console.log('VS²Sync extension is now active');
 
     // Get configuration
-    const config = vscode.workspace.getConfiguration('vssync');
+    const config = vscode.workspace.getConfiguration('vs2sync');
     const basePort = config.get<number>('ipcPort', 52342);
     const timeout = config.get<number>('timeout', 5000);
 
@@ -39,7 +39,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
     // Register the "Open in Visual Studio" command
     const openInVsCommand = vscode.commands.registerCommand(
-        'vssync.openInVisualStudio',
+        'vs2sync.openInVisualStudio',
         async (uri?: vscode.Uri) => {
             await openInVisualStudio(uri);
         }

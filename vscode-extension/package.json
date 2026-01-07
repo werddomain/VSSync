@@ -1,9 +1,9 @@
 {
-  "name": "vssync",
+  "name": "vs2sync",
   "displayName": "VS²Sync - Open in Other IDE",
   "description": "Synchronize files between VS Code and Visual Studio. Open the current file in the other IDE with a single click.",
   "version": "1.1.2",
-  "publisher": "VS-2-Sync",
+  "publisher": "KazoMedia",
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -23,13 +23,13 @@
   "contributes": {
     "commands": [
       {
-        "command": "vssync.openInVisualStudio",
+        "command": "vs2sync.openInVisualStudio",
         "title": "Open in Visual Studio"
       }
     ],
     "keybindings": [
       {
-        "command": "vssync.openInVisualStudio",
+        "command": "vs2sync.openInVisualStudio",
         "key": "ctrl+shift+v s",
         "mac": "cmd+shift+v s",
         "when": "editorTextFocus"
@@ -38,13 +38,13 @@
     "menus": {
       "editor/title/context": [
         {
-          "command": "vssync.openInVisualStudio",
+          "command": "vs2sync.openInVisualStudio",
           "group": "navigation"
         }
       ],
       "editor/title": [
         {
-          "command": "vssync.openInVisualStudio",
+          "command": "vs2sync.openInVisualStudio",
           "group": "navigation"
         }
       ]
@@ -52,12 +52,12 @@
     "configuration": {
       "title": "VS²Sync",
       "properties": {
-        "vssync.ipcPort": {
+        "vs2sync.ipcPort": {
           "type": "number",
           "default": 52342,
           "description": "Base port for IPC communication (will scan range port to port+100)"
         },
-        "vssync.timeout": {
+        "vs2sync.timeout": {
           "type": "number",
           "default": 5000,
           "description": "Timeout in milliseconds for IPC communication"

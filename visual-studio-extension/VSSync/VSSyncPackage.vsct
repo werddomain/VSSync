@@ -22,7 +22,7 @@
         <Icon guid="guidImages" id="bmpVSCode" />
         <Strings>
           <ButtonText>Open in VS Code</ButtonText>
-          <LocCanonicalName>VSSync.OpenInVSCode</LocCanonicalName>
+          <LocCanonicalName>VS2Sync.OpenInVSCode</LocCanonicalName>
         </Strings>
       </Button>
     </Buttons>

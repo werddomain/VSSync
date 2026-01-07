@@ -175,7 +175,7 @@ To enable automated publishing to marketplaces, you need to configure repository
      "$schema": "http://json.schemastore.org/vsix-publish",
      "categories": ["Tools"],
      "identity": {
-       "internalName": "VSSync"
+       "internalName": "VS2Sync"
      },
      "overview": "../../README.md",
      "priceCategory": "free",
