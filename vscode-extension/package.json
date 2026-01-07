@@ -2,7 +2,7 @@
   "name": "vssync",
   "displayName": "VS²Sync - Open in Other IDE",
   "description": "Synchronize files between VS Code and Visual Studio. Open the current file in the other IDE with a single click.",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "publisher": "VS-2-Sync",
   "engines": {
     "vscode": "^1.74.0"
