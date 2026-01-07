@@ -61,6 +61,7 @@
 
     <GuidSymbol name="guidImages" value="{d7b9c0e0-8c5d-4e4f-b8a7-0c1d2e3f4a5d}" >
       <IDSymbol name="bmpVSCode" value="1" />
+      
     </GuidSymbol>
   </Symbols>
 </CommandTable>
