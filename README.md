@@ -2,6 +2,7 @@
 
 [![Release](https://img.shields.io/github/v/release/werddomain/VSSync?style=flat-square)](https://github.com/werddomain/VSSync/releases)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/werddomain/VSSync/build.yml?branch=main&style=flat-square&label=build)](https://github.com/werddomain/VSSync/actions/workflows/build.yml)
+[![Release Extensions](https://github.com/werddomain/VSSync/actions/workflows/release.yml/badge.svg)](https://github.com/werddomain/VSSync/actions/workflows/release.yml)
 [![License](https://img.shields.io/github/license/werddomain/VSSync?style=flat-square)](LICENSE)
 [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/KazoMedia.vs2sync?style=flat-square&label=VS%20Code)](https://marketplace.visualstudio.com/items?itemName=KazoMedia.vs2sync)
 [![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/KazoMedia.VS2Sync-VisualStudio?style=flat-square&label=Visual%20Studio)](https://marketplace.visualstudio.com/items?itemName=KazoMedia.VS2Sync-VisualStudio)
